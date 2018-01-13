@@ -9,14 +9,13 @@ def base64urlUInt_encode(val):
     bytes = val.to_bytes((val.bit_length() +7) // 8, byteorder='big')
     return urlsafe_b64encode(bytes).decode()
 
-def get_key(index):
+def generate_key(index):
     key = RSA.generate(2048)
     return prefix + "_" + str(index), key
 
 def get_keyset():
     keyset = {'keys':[]}
     for key in keys:
-        print(key)
         public_key = key[1].publickey()
         keyset['keys'].append({
             'kty': 'rsa',
@@ -34,11 +33,16 @@ def get_client_key():
     webkey = {
             'kty': 'rsa',
             'alg': 'HS256',
-            'use': ' sig'
+            'use': ' sig',
+            'e': base64urlUInt_encode(key.e),
+            'd': base64urlUInt_encode(key.d)
     }
-    return webkey
+    return {
+        'key': key,
+        'webkey': webkey
+    }
 
 
 for index in range(4):
-    keys.append(get_key(index))
+    keys.append(generate_key(index))
     

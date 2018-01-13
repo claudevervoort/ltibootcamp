@@ -25,13 +25,13 @@ NAMES = [('Tijn', 'Willem'),
 
 ID_PREFIX = 'LTIBCU_'
 
-users = []
+USERS = []
 
-class User:
+class User(object):
 
-    def __init__(self, name, id):
+    def __init__(self, name, user_id):
         self.name = name
-        self.id = id
+        self.id = user_id
         self.email = '{0}.{1}@example.com'.format(self.name[0], self.name[1])
 
 
@@ -44,4 +44,4 @@ def get_roster():
     return roster
 
 for index in range(NAMES.count()):
-    users.append(User(NAMES[index], ID_PREFIX + str(index)))
+    USERS.append(User(NAMES[index], ID_PREFIX + str(index)))
