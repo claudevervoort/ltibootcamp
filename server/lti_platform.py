@@ -1,5 +1,7 @@
 from flask import Flask, jsonify
-from keys.keys_manager import get_keyset, get_client_key
+from keys.keys_manager import get_keyset, get_client_key, keys
+from random import randrange
+import jwt
 
 app = Flask(__name__)
 tools = []
@@ -25,6 +27,9 @@ def newtool():
     tools.append(tool)
     return jsonify(tool)
 
-@app.route("/tool/<int:tool_id>/student_launch")
+@app.route("/tool/<int:tool_id>/studentlaunch")
 def student_launch(tool_id):
-    return ''
+    key = keys[randrange(0, len(keys))]
+    privatekey = key[1].exportKey()
+    payload = {'test': 'xxx'}
+    return jwt.encode(payload, privatekey, 'RS256')
