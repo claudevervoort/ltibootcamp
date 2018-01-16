@@ -4,3 +4,5 @@
 2. Activate your virtual env
 3. run: pip install -r requirements.txt
 
+To run the notebook locally: jupyter notebook
+
