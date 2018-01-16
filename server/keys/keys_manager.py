@@ -33,7 +33,7 @@ def get_client_key():
     webkey = {
             'kty': 'rsa',
             'alg': 'HS256',
-            'use': ' sig',
+            'use': 'sig',
             'e': base64urlUInt_encode(key.e),
             'd': base64urlUInt_encode(key.d)
     }
