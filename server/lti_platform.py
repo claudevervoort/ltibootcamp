@@ -30,6 +30,13 @@ def newtool():
     tools.append(tool)
     return jsonify(tool)
 
+@app.route("/tool/<int:tool_id>/cisr")
+def content_item_launch(tool_id):
+    key = keys[randrange(0, len(keys))]
+    privatekey = key[1].exportKey()
+    payload = platform.addToMessage({'test': 'xxx'})
+    return jwt.encode(payload, privatekey, algorithm='RS256', headers={'kid':key[0]})
+
 @app.route("/tool/<int:tool_id>/link/<int:link_id>/studentlaunch")
 def student_launch(tool_id, link_id):
     key = keys[randrange(0, len(keys))]
