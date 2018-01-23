@@ -24,7 +24,7 @@ def get_keyset():
             'use': 'sig',
             'e':  base64urlUInt_encode(public_key.e),
             'n':  base64urlUInt_encode(public_key.n)
-        })
+        }
     return keyset
 
 
