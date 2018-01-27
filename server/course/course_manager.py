@@ -1,5 +1,5 @@
-from users import user_manager;
-import uuid;
+from users.user_manager import Roster
+import uuid
 
 class LineItem(object):
 
@@ -16,18 +16,20 @@ class ResourceLink(object):
 
 class Course(object):
 
-    def __init__(self, id, name, roster):
-        self.id = id;
+    def __init__(self, id, name):
+        self.id = id
         self.context = {
             'id': id,
             'label': name,
             'title': name,
             'type': ['CourseSection']
         }
-        self.roster = roster
+        self.roster = Roster()
         self.lineitems = []
         self.links = []
 
+    def addToMessage(self, message):
+        return message
+
 def new_course(name):
-    roster = user_manager.get_roster()
-    return Course(str(uuid.uuid1()), name, roster)
+    return Course(str(uuid.uuid1()), name)

@@ -31,8 +31,8 @@ def get_keyset():
 def get_client_key():
     key = RSA.generate(2048)
     webkey = {
-            'kty': 'rsa',
-            'alg': 'HS256',
+            'kty': 'RSA',
+            'alg': 'RS256',
             'use': 'sig',
             'e': base64urlUInt_encode(key.e),
             'd': base64urlUInt_encode(key.d)

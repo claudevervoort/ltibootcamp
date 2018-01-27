@@ -37,13 +37,13 @@ class User(object):
 
     def addToMessage(self, msg):
         updated = copy(msg)
-        updated.update = {
+        updated.update({
             'sub': self.id,
             'given_name': self.name[0],
             'family_name': self.name[1],
             'name': self.name[0] + ' ' + self.name[1],
             'email': self.email
-        }
+        })
         return updated
 
 class Roster(object):
@@ -51,10 +51,13 @@ class Roster(object):
     def __init__(self):
         self.roster = []
         for user in sample(USERS, 16):
-            roster.append({'user': user, 'role': 'http://purl.imsglobal.org/vocab/lis/v2/membership#Learner'})
-        roster[0]['role'] = 'http://purl.imsglobal.org/vocab/lis/v2/membership#Instructor'
-        roster[1]['role'] = 'http://purl.imsglobal.org/vocab/lis/v2/membership/instructor#TeachingAssistant'
+            self.roster.append({'user': user, 'role': 'http://purl.imsglobal.org/vocab/lis/v2/membership#Learner'})
+        self.roster[0]['role'] = 'http://purl.imsglobal.org/vocab/lis/v2/membership#Instructor'
+        self.roster[1]['role'] = 'http://purl.imsglobal.org/vocab/lis/v2/membership/instructor#TeachingAssistant'
+
+    def get_instructor(self):
+        return self.roster[0]
 
 
-for index in range(NAMES.count()):
+for index in range(len(NAMES)):
     USERS.append(User(NAMES[index], ID_PREFIX + str(index)))

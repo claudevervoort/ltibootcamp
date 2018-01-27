@@ -2,6 +2,7 @@ from time import time
 from copy import copy
 from keys.keys_manager import get_client_key, keys, get_keyset
 import jwt
+import uuid 
 from random import randrange
 
 class Tool(object):
@@ -12,11 +13,20 @@ class Tool(object):
         self.key = get_client_key()
         self.platform = platform
 
-    def token(self, message):
+    def token(self, messageType, message):
         key = keys[randrange(0, len(keys))]
         privatekey = key[1].exportKey()
-        payload = self.platform.addToMessage({'test': 'xxx'})
-        return jwt.encode(payload, privatekey, algorithm='RS256', headers={'kid':key[0]})
+        now = int(time())
+        message['iat'] = now
+        message['exp'] = now + 60
+        message['nonce'] = str(uuid.uuid1())
+        message['iss'] = self.platform.url
+        message['aud'] = self.client_id
+        message['http://imsglobal.org/lti/deployment_id'] = self.deployment_id
+        message['http://imsglobal.org/lti/message_type'] = messageType
+        message['http://imsglobal.org/lti/version'] = '1.3.0'
+        message = self.platform.addToMessage(message)
+        return jwt.encode(message, privatekey, algorithm='RS256', headers={'kid':key[0]})
 
 class LTIPlatform(object):
 

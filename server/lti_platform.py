@@ -1,13 +1,13 @@
 from flask import Flask, jsonify
 from ltiplatform.ltiplatform_manager import LTIPlatform
+from course.course_manager import new_course
 from keys import keys_manager
 from random import randrange
 import jwt
 
-platform = LTIPlatform('http://localhost')
+platform = LTIPlatform('http://localhost:5000')
 app = Flask(__name__)
-tools = []
-
+course_by_tool = {}
 
 @app.route("/")
 def hello():
@@ -20,6 +20,8 @@ def keyset():
 @app.route("/newtool")
 def newtool():
     tool = platform.new_tool()
+    course = new_course('LTI Bootcamp Course')
+    course_by_tool[tool.client_id] = course
     return jsonify({
         'client_id': tool.client_id,
         'deployment_id': tool.deployment_id,
@@ -28,7 +30,11 @@ def newtool():
 
 @app.route("/tool/<tool_id>/cisr")
 def content_item_launch(tool_id):
-    return platform.get_tool(tool_id).token({'text':'xxx'})
+    course = course_by_tool[tool_id]
+    message = {}
+    message = course.roster.get_instructor()['user'].addToMessage(message)
+    message = course.addToMessage(message)
+    return platform.get_tool(tool_id).token('ContentItenSelectionRequest', message)
 
 @app.route("/tool/<tool_id>/link/<int:link_id>/studentlaunch")
 def student_launch(tool_id, link_id):
