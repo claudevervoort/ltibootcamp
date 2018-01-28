@@ -1,4 +1,4 @@
-from flask import Flask, jsonify
+from flask import Flask, jsonify, request
 from ltiplatform.ltiplatform_manager import LTIPlatform
 from course.course_manager import new_course
 from keys import keys_manager
@@ -35,6 +35,12 @@ def content_item_launch(tool_id):
     message = course.roster.get_instructor()['user'].addToMessage(message)
     message = course.addToMessage(message)
     return platform.get_tool(tool_id).token('ContentItenSelectionRequest', message)
+
+@app.route("/tool/<tool_id>/cir", methods=['POST'])
+def content_item_return(tool_id):
+    jwt = request['jws_token']
+
+
 
 @app.route("/tool/<tool_id>/link/<int:link_id>/studentlaunch")
 def student_launch(tool_id, link_id):
