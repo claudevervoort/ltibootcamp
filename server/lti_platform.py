@@ -36,9 +36,10 @@ def content_item_launch(tool_id):
     message = course.addToMessage(message)
     return platform.get_tool(tool_id).token('ContentItenSelectionRequest', message)
 
-@app.route("/tool/<tool_id>/cir", methods=['POST'])
-def content_item_return(tool_id):
+@app.route("/tool/<context_id>/cir", methods=['POST'])
+def content_item_return(context_id):
     jwt = request['jws_token']
+    jwt_headers = jwt.get_unverified_header(jwt)
 
 
 
