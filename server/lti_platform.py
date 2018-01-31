@@ -31,10 +31,9 @@ def newtool():
 @app.route("/tool/<tool_id>/cisr")
 def content_item_launch(tool_id):
     course = course_by_tool[tool_id]
+    instructor = course.roster.get_instructor()
     message = {}
-    message = course.roster.get_instructor()['user'].addToMessage(message)
-    message = course.addToMessage(message)
-    return platform.get_tool(tool_id).token('ContentItenSelectionRequest', message)
+    return platform.get_tool(tool_id).token('ContentItemSelectionRequest', course, instructor, message)
 
 @app.route("/tool/<context_id>/cir", methods=['POST'])
 def content_item_return(context_id):

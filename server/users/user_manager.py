@@ -46,14 +46,28 @@ class User(object):
         })
         return updated
 
+class Member(object):
+
+    def __init__(self, user, role):
+        self.user = user
+        self.role = role
+
+    def addToMessage(self, msg):
+        updated = self.user.addToMessage(msg)
+        updated.update({
+            'role': [self.role]
+        })
+        return updated
+        
+
 class Roster(object):
 
     def __init__(self):
         self.roster = []
         for user in sample(USERS, 16):
-            self.roster.append({'user': user, 'role': 'http://purl.imsglobal.org/vocab/lis/v2/membership#Learner'})
-        self.roster[0]['role'] = 'http://purl.imsglobal.org/vocab/lis/v2/membership#Instructor'
-        self.roster[1]['role'] = 'http://purl.imsglobal.org/vocab/lis/v2/membership/instructor#TeachingAssistant'
+            self.roster.append(Member(user, 'http://purl.imsglobal.org/vocab/lis/v2/membership#Learner'))
+        self.roster[0].role = 'http://purl.imsglobal.org/vocab/lis/v2/membership#Instructor'
+        self.roster[1].role = 'http://purl.imsglobal.org/vocab/lis/v2/membership/instructor#TeachingAssistant'
 
     def get_instructor(self):
         return self.roster[0]
