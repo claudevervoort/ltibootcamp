@@ -32,7 +32,15 @@ def newtool():
 def content_item_launch(tool_id):
     course = course_by_tool[tool_id]
     instructor = course.roster.get_instructor()
-    message = {}
+    message = {
+        "http://imsglobal.org/lti/deep_linking_request": {
+            "accept_media_types": ["application/vnd.ims.lti.v1.ltilink"],
+            "accept_presentation_document_targets": [ "iframe", "window"],
+            "accept_multiple": True,
+            "auto_create": True,
+            "data": "op=321&v=44"
+        }
+    }
     return platform.get_tool(tool_id).token('ContentItemSelectionRequest', course, instructor, message)
 
 @app.route("/tool/<context_id>/cir", methods=['POST'])

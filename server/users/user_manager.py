@@ -55,7 +55,7 @@ class Member(object):
     def addToMessage(self, msg):
         updated = self.user.addToMessage(msg)
         updated.update({
-            'role': [self.role]
+            'http://imsglobal.org/lti/roles': [self.role]
         })
         return updated
         
