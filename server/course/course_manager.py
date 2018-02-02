@@ -29,6 +29,7 @@ class Course(object):
         self.links = []
 
     def addToMessage(self, message):
+        message['http://imsglobal.org/lti/context'] = self.context
         return message
 
 def new_course(name):

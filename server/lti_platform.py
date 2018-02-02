@@ -1,4 +1,4 @@
-from flask import Flask, jsonify
+from flask import Flask, jsonify, request
 from ltiplatform.ltiplatform_manager import LTIPlatform
 from course.course_manager import new_course
 from keys import keys_manager
@@ -31,10 +31,24 @@ def newtool():
 @app.route("/tool/<tool_id>/cisr")
 def content_item_launch(tool_id):
     course = course_by_tool[tool_id]
-    message = {}
-    message = course.roster.get_instructor()['user'].addToMessage(message)
-    message = course.addToMessage(message)
-    return platform.get_tool(tool_id).token('ContentItenSelectionRequest', message)
+    instructor = course.roster.get_instructor()
+    message = {
+        "http://imsglobal.org/lti/deep_linking_request": {
+            "accept_media_types": ["application/vnd.ims.lti.v1.ltilink"],
+            "accept_presentation_document_targets": [ "iframe", "window"],
+            "accept_multiple": True,
+            "auto_create": True,
+            "data": "op=321&v=44"
+        }
+    }
+    return platform.get_tool(tool_id).token('ContentItemSelectionRequest', course, instructor, message)
+
+@app.route("/tool/<context_id>/cir", methods=['POST'])
+def content_item_return(context_id):
+    jwt = request['jws_token']
+    jwt_headers = jwt.get_unverified_header(jwt)
+
+
 
 @app.route("/tool/<tool_id>/link/<int:link_id>/studentlaunch")
 def student_launch(tool_id, link_id):

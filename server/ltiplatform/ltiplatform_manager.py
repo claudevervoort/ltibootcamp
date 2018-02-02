@@ -13,7 +13,7 @@ class Tool(object):
         self.key = get_client_key()
         self.platform = platform
 
-    def token(self, messageType, message):
+    def token(self, messageType, course, member, message):
         key = keys[randrange(0, len(keys))]
         privatekey = key[1].exportKey()
         now = int(time())
@@ -25,6 +25,9 @@ class Tool(object):
         message['http://imsglobal.org/lti/deployment_id'] = self.deployment_id
         message['http://imsglobal.org/lti/message_type'] = messageType
         message['http://imsglobal.org/lti/version'] = '1.3.0'
+        message = member.addToMessage(message)
+        message = course.addToMessage(message)
+        
         message = self.platform.addToMessage(message)
         return jwt.encode(message, privatekey, algorithm='RS256', headers={'kid':key[0]})
 
