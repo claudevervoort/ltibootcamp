@@ -41,7 +41,8 @@ def content_item_launch(tool_id):
             "data": "op=321&v=44"
         }
     }
-    return platform.get_tool(tool_id).token('ContentItemSelectionRequest', course, instructor, message)
+    return_url = "/tool/{0}/cisr".format(course.id)
+    return platform.get_tool(tool_id).token('ContentItemSelectionRequest', course, instructor, message, return_url)
 
 @app.route("/tool/<context_id>/cir", methods=['POST'])
 def content_item_return(context_id):

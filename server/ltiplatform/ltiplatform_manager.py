@@ -13,7 +13,7 @@ class Tool(object):
         self.key = get_client_key()
         self.platform = platform
 
-    def token(self, messageType, course, member, message):
+    def token(self, messageType, course, member, message, return_url):
         key = keys[randrange(0, len(keys))]
         privatekey = key[1].exportKey()
         now = int(time())
@@ -25,6 +25,10 @@ class Tool(object):
         message['http://imsglobal.org/lti/deployment_id'] = self.deployment_id
         message['http://imsglobal.org/lti/message_type'] = messageType
         message['http://imsglobal.org/lti/version'] = '1.3.0'
+        message['http://imsglobal.org/lti/launch_presentation'] = {
+            "document_target": "iframe",
+            "return_url": self.platform.host + return_url
+        }
         message = member.addToMessage(message)
         message = course.addToMessage(message)
         
