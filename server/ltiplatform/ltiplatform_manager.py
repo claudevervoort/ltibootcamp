@@ -27,7 +27,7 @@ class Tool(object):
         message['http://imsglobal.org/lti/version'] = '1.3.0'
         message['http://imsglobal.org/lti/launch_presentation'] = {
             "document_target": "iframe",
-            "return_url": self.platform.host + return_url
+            "return_url": self.platform.url + return_url
         }
         message = member.addToMessage(message)
         message = course.addToMessage(message)
@@ -37,13 +37,13 @@ class Tool(object):
 
 class LTIPlatform(object):
 
-    def __init__(self, host):
+    def __init__(self, url):
         self.name = 'LTI Bootcamp Platform'
         self.description = 'LTI Bootcamp Test Platform'
         self.guid = 'ltibc_at_' + str(int(time()))
         self.contact_email = 'claude.vervoort@gmail.com'
         self.version = '2018JAN01'
-        self.url = host
+        self.url = url
         self.tools = []
     
     def addToMessage(self, msg):

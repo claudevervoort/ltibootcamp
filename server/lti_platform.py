@@ -1,4 +1,4 @@
-from flask import Flask, jsonify, request
+from flask import Flask, jsonify, request, render_template
 from ltiplatform.ltiplatform_manager import LTIPlatform
 from course.course_manager import new_course
 from keys import keys_manager
@@ -41,13 +41,14 @@ def content_item_launch(tool_id):
             "data": "op=321&v=44"
         }
     }
-    return_url = "/tool/{0}/cisr".format(course.id)
+    return_url = "/tool/{0}/cir".format(course.id)
     return platform.get_tool(tool_id).token('ContentItemSelectionRequest', course, instructor, message, return_url)
 
 @app.route("/tool/<context_id>/cir", methods=['POST'])
 def content_item_return(context_id):
-    jwt = request['jws_token']
-    jwt_headers = jwt.get_unverified_header(jwt)
+    # jwt = request['jws_token']
+    # jwt_headers = jwt.get_unverified_header(jwt)
+    return render_template('courseoutline.html', name='sss')
 
 
 
