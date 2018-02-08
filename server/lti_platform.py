@@ -25,7 +25,8 @@ def newtool():
     return jsonify({
         'client_id': tool.client_id,
         'deployment_id': tool.deployment_id,
-        'key': tool.key['webkey']
+        'webkey': tool.key['webkey'],
+        'webkeyPem': tool.key['key'].exportKey().decode('utf-8')
     })
 
 @app.route("/tool/<tool_id>/cisr")
@@ -46,10 +47,15 @@ def content_item_launch(tool_id):
 
 @app.route("/tool/<context_id>/cir", methods=['POST'])
 def content_item_return(context_id):
-    # jwt = request['jws_token']
-    # jwt_headers = jwt.get_unverified_header(jwt)
+    encoded_jwt = request.form['jws_token']
+    unverified = jwt.decode(encoded_jwt, verify=False)
+    tool = platform.get_tool(unverified['iss'])
+    print('tool:' +  tool.client_id)
+    deep_linking_res = jwt.decode(encoded_jwt, 
+       key=tool.key['key'].publickey().exportKey(), 
+       algorithms=['RS256'],
+       audience=platform.url)
     return render_template('courseoutline.html', name='sss')
-
 
 
 @app.route("/tool/<tool_id>/link/<int:link_id>/studentlaunch")

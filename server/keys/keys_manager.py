@@ -35,7 +35,8 @@ def get_client_key():
             'alg': 'RS256',
             'use': 'sig',
             'e': base64urlUInt_encode(key.e),
-            'd': base64urlUInt_encode(key.d)
+            'd': base64urlUInt_encode(key.d),
+            'n': base64urlUInt_encode(key.n)
     }
     return {
         'key': key,
