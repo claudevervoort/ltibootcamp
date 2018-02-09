@@ -1,5 +1,6 @@
 from users.user_manager import Roster
 import uuid
+from time import time
 
 class LineItem(object):
 
@@ -16,10 +17,10 @@ class ResourceLink(object):
 
 class Course(object):
 
-    def __init__(self, id, name):
-        self.id = id
+    def __init__(self, name):
+        self.id = str(uuid.uuid1())
         self.context = {
-            'id': id,
+            'id': self.id,
             'label': name,
             'title': name,
             'type': ['CourseSection']
@@ -32,5 +33,3 @@ class Course(object):
         message['http://imsglobal.org/lti/context'] = self.context
         return message
 
-def new_course(name):
-    return Course(str(uuid.uuid1()), name)

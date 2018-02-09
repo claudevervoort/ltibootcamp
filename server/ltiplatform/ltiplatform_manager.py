@@ -2,7 +2,8 @@ from time import time
 from copy import copy
 from keys.keys_manager import get_client_key, keys, get_keyset
 import jwt
-import uuid 
+import uuid
+from course.course_manager import Course 
 from random import randrange
 
 class Tool(object):
@@ -44,6 +45,7 @@ class LTIPlatform(object):
         self.contact_email = 'claude.vervoort@gmail.com'
         self.version = '2018JAN01'
         self.url = url
+        self.courses = {}
         self.tools = []
     
     def addToMessage(self, msg):
@@ -65,3 +67,11 @@ class LTIPlatform(object):
         tool = Tool(self, client_id)
         self.tools.append(tool)
         return tool
+
+    def new_course(self):
+        course = Course("LTI Bootcamp Course")
+        self.courses[course.id] = course
+        return course
+
+    def get_course(self, course_id):
+        return self.courses[course_id]

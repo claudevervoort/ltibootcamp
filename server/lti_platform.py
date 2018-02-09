@@ -1,6 +1,5 @@
-from flask import Flask, jsonify, request, render_template
+from flask import Flask, jsonify, request, render_template, redirect
 from ltiplatform.ltiplatform_manager import LTIPlatform
-from course.course_manager import new_course
 from keys import keys_manager
 from random import randrange
 import jwt
@@ -20,8 +19,7 @@ def keyset():
 @app.route("/newtool")
 def newtool():
     tool = platform.new_tool()
-    course = new_course('LTI Bootcamp Course')
-    course_by_tool[tool.client_id] = course
+    course_by_tool[tool.client_id] = platform.new_course()
     return jsonify({
         'client_id': tool.client_id,
         'deployment_id': tool.deployment_id,
@@ -55,7 +53,7 @@ def content_item_return(context_id):
        key=tool.key['key'].publickey().exportKey(), 
        algorithms=['RS256'],
        audience=platform.url)
-    return render_template('courseoutline.html', name='sss')
+    return redirect('/course/'+context_id, code=302)
 
 
 @app.route("/tool/<tool_id>/link/<int:link_id>/studentlaunch")
@@ -64,3 +62,8 @@ def student_launch(tool_id, link_id):
     privatekey = key[1].exportKey()
     payload = platform.addToMessage({'test': 'xxx'})
     return jwt.encode(payload, privatekey, 'RS256')
+
+
+@app.route("/course/<course_id>")
+def show_course(course_id):
+    return render_template('courseoutline.html', course=platform.get_course(course_id))
