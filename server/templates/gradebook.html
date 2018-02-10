@@ -11,11 +11,11 @@
         <div class="container">
             <h1>
                 <img src="/assets/bootcamp_transparent.png">{{ course.context['title'] }}
-                <a class="btn btn-outline-secondary" href="/course/{{course.id}}/gradebook">gradebook</a>
+                <a class="btn btn-outline-secondary" href="/course/{{course.id}}">content</a>
             </h1>
             <!-- Content here -->
             <div class="row">
-                <h2>Week 1</h2>
+                <h2>Gradebook</h2>
             </div>
             {% for rl in course.links %}
             <div class="row">

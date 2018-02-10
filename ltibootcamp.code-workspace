@@ -1,0 +1,10 @@
+{
+	"folders": [
+		{
+			"path": "."
+		}
+	],
+	"settings": {
+		"python.pythonPath": "/home/claude/.py3envs/lti_bootcamp/bin/python"
+	}
+}

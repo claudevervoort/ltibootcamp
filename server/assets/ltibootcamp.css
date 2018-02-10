@@ -1,0 +1,14 @@
+@import url('https://fonts.googleapis.com/css?family=Raleway');
+
+body {
+  background-color: #0091B0;
+  font-family: 'Raleway', sans-serif;
+  color: white
+}
+
+.btn-outline-secondary {
+    color: #ecf83c;
+    background-color: transparent;
+    background-image: none;
+    border-color: #ecf83c;
+}
