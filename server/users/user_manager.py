@@ -1,4 +1,4 @@
-from random import sample
+from random import sample, randrange
 from copy import copy
 
 NAMES = [('Tijn', 'Willem'),
@@ -46,6 +46,11 @@ class User(object):
         })
         return updated
 
+    @property
+    def fullname(self):
+        return '{0} {1}'.format(self.name[0], self.name[1])
+
+
 class Member(object):
 
     def __init__(self, user, role):
@@ -69,8 +74,15 @@ class Roster(object):
         self.roster[0].role = 'http://purl.imsglobal.org/vocab/lis/v2/membership#Instructor'
         self.roster[1].role = 'http://purl.imsglobal.org/vocab/lis/v2/membership/instructor#TeachingAssistant'
 
-    def get_instructor(self):
+    def getInstructor(self):
         return self.roster[0]
+
+    @property
+    def students(self):
+        return self.roster[2:]
+
+    def getOneStudent(self):
+        return self.roster[randrange(2, len(self.roster))]
 
 
 for index in range(len(NAMES)):

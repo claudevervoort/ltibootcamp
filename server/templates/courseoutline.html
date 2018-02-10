@@ -19,7 +19,7 @@
             </div>
             {% for rl in course.links %}
             <div class="row">
-                {{ rl.label }}
+                {{ rl.label }} &nbsp;<small class="text-muted">{{rl.id}}</small>
             </div>
             {% endfor %}
         </div>

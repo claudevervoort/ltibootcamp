@@ -13,15 +13,28 @@
                 <img src="/assets/bootcamp_transparent.png">{{ course.context['title'] }}
                 <a class="btn btn-outline-secondary" href="/course/{{course.id}}">content</a>
             </h1>
-            <!-- Content here -->
             <div class="row">
-                <h2>Gradebook</h2>
+                <table class="table">
+                    <thead>
+                        <tr>
+                        <th scope="col">Name</th>
+                        {% for li in course.lineitems%}
+                        <th scope="col">{{ li.label }} ({{ li.score_maximum }} pts)</th>
+                        {% endfor %}
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for member in course.roster.students%}
+                        <tr>
+                            <th scope="row">{{ member.user.fullname }}</th>
+                            {% for li in course.lineitems%}
+                            <td>{{li.getScaledResult(member.user.id)}}</td>
+                            {% endfor %}
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                    </table>
             </div>
-            {% for rl in course.links %}
-            <div class="row">
-                {{ rl.label }}
-            </div>
-            {% endfor %}
         </div>
 
 

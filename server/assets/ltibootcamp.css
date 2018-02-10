@@ -12,3 +12,7 @@ body {
     background-image: none;
     border-color: #ecf83c;
 }
+
+.text-muted {
+    color:#ecf83c !important;
+}

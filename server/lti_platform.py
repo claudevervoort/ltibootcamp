@@ -34,7 +34,7 @@ def newtool():
 @app.route("/tool/<tool_id>/cisr")
 def content_item_launch(tool_id):
     course = course_by_tool[tool_id]
-    instructor = course.roster.get_instructor()
+    instructor = course.roster.getInstructor()
     message = {
         "http://imsglobal.org/lti/deep_linking_request": {
             "accept_media_types": ["application/vnd.ims.lti.v1.ltilink"],
@@ -62,12 +62,13 @@ def content_item_return(context_id):
     return redirect('/course/'+context_id, code=302)
 
 
-@app.route("/tool/<tool_id>/link/<int:link_id>/studentlaunch")
-def student_launch(tool_id, link_id):
-    key = keys[randrange(0, len(keys))]
-    privatekey = key[1].exportKey()
-    payload = platform.addToMessage({'test': 'xxx'})
-    return jwt.encode(payload, privatekey, 'RS256')
+@app.route("/tool/<tool_id>/context/<context_id>/studentlaunch")
+def student_launch(tool_id, context_id):
+    course = platform.get_course(context_id)
+    rlid = request.args.get('rlid', course.getOneGradableLinkId() )
+    resource_link = course.getResourceLink(rlid)
+    message = resource_link.addToMessage({})
+    return platform.get_tool(tool_id).token('LTIResourceLinkLaunch', course, course.roster.getOneStudent(), message, "")
 
 
 @app.route("/course/<course_id>")
