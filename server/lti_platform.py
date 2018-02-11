@@ -23,6 +23,7 @@ def keyset():
 @app.route("/newtool")
 def newtool():
     tool = platform.new_tool()
+    platform.url = request.url_root
     course_by_tool[tool.client_id] = platform.new_course()
     return jsonify({
         'client_id': tool.client_id,
@@ -45,7 +46,7 @@ def content_item_launch(tool_id):
         }
     }
     return_url = "/tool/{0}/cir".format(course.id)
-    return platform.get_tool(tool_id).token('ContentItemSelectionRequest', course, instructor, message, return_url)
+    return platform.get_tool(tool_id).token('ContentItemSelectionRequest', course, instructor, message, return_url, request_url=request.url_root)
 
 @app.route("/tool/<context_id>/cir", methods=['POST'])
 def content_item_return(context_id):
