@@ -14,25 +14,45 @@ class Tool(object):
         self.key = get_client_key()
         self.platform = platform
 
-    def token(self, messageType, course, member, message, return_url, request_url=None):
+    def getPublicKey(self):
+        return self.key['key'].publickey()
+
+    def token(self, messageType, course, member, message, return_url, request_url=None, resource_link=None):
         key = keys[randrange(0, len(keys))]
         privatekey = key[1].exportKey()
         now = int(time())
-        message['iat'] = now
-        message['exp'] = now + 60
-        message['nonce'] = str(uuid.uuid1())
-        message['iss'] = request_url.rstrip('/') if request_url else self.platform.url
-        message['aud'] = self.client_id
-        message['http://imsglobal.org/lti/deployment_id'] = self.deployment_id
-        message['http://imsglobal.org/lti/message_type'] = messageType
-        message['http://imsglobal.org/lti/version'] = '1.3.0'
-        message['http://imsglobal.org/lti/launch_presentation'] = {
-            "document_target": "iframe",
-            "return_url": self.platform.url + return_url
+        root_url = request_url.rstrip('/') if request_url else self.platform.url
+        message.update({
+            'iat': now,
+            'exp': now + 60,
+            'nonce': str(uuid.uuid1()),
+            'iss': root_url,
+            'aud': self.client_id,
+            'http://imsglobal.org/lti/deployment_id': self.deployment_id,
+            'http://imsglobal.org/lti/message_type': messageType,
+            'http://imsglobal.org/lti/version': '1.3.0',
+            'http://imsglobal.org/lti/launch_presentation': {
+                "document_target": "iframe",
+                "return_url": root_url + return_url
+            },
+            'http://imsglobal.org/lti/token': root_url + "/auth/token",
+        })
+        ags_claim = {
+            'scope': ["http://imsglobal.org/ags/lineitem",
+                        "http://imsglobal.org/ags/result/read",
+                        "http://imsglobal.org/ags/score/publish",
+                        ],
+            'lineitems': '{0}/{1}/lineitems'.format(root_url, course.id) 
         }
         message = member.addToMessage(message)
         message = course.addToMessage(message)
         
+        if resource_link:
+            message = resource_link.addToMessage(message)
+            if resource_link.lineitem:
+                ags_claim['lineitem'] = '{0}/{1}/lineitems/{2}'.format(root_url, course.id, resource_link.lineitem.id)
+
+        message['http://imsglobal.org/lti/ags'] = ags_claim     
         message = self.platform.addToMessage(message)
         return jwt.encode(message, privatekey, algorithm='RS256', headers={'kid':key[0]})
 

@@ -46,7 +46,7 @@ def content_item_launch(tool_id):
         }
     }
     return_url = "/tool/{0}/cir".format(course.id)
-    return platform.get_tool(tool_id).token('ContentItemSelectionRequest', course, instructor, message, return_url, request_url=request.url_root)
+    return platform.get_tool(tool_id).token('LTIDeepLinkingRequest', course, instructor, message, return_url, request_url=request.url_root)
 
 @app.route("/tool/<context_id>/cir", methods=['POST'])
 def content_item_return(context_id):
@@ -54,9 +54,9 @@ def content_item_return(context_id):
     unverified = jwt.decode(encoded_jwt, verify=False)
     tool = platform.get_tool(unverified['iss'])
     deep_linking_res = jwt.decode(encoded_jwt, 
-       key=tool.key['key'].publickey().exportKey(), 
+       key=tool.getPublicKey().exportKey(), 
        algorithms=['RS256'],
-       audience=platform.url)
+       audience=request.url_root.rstrip('/'))
     if ('http://imsglobal.org/lti/content_items' in deep_linking_res):
         content_items = deep_linking_res['http://imsglobal.org/lti/content_items']
         platform.get_course(context_id).addResourceLinks(content_items)
@@ -68,8 +68,13 @@ def student_launch(tool_id, context_id):
     course = platform.get_course(context_id)
     rlid = request.args.get('rlid', course.getOneGradableLinkId() )
     resource_link = course.getResourceLink(rlid)
-    message = resource_link.addToMessage({})
-    return platform.get_tool(tool_id).token('LTIResourceLinkLaunch', course, course.roster.getOneStudent(), message, "")
+    return platform.get_tool(tool_id).token('LTIResourceLinkLaunch', 
+                                            course, 
+                                            course.roster.getOneStudent(), 
+                                            {}, 
+                                            request.url_root,
+                                            request_url=request.url_root,
+                                            resource_link=resource_link)
 
 
 @app.route("/course/<course_id>")
@@ -79,3 +84,19 @@ def show_course(course_id):
 @app.route("/course/<course_id>/gradebook")
 def show_gradebook(course_id):
     return render_template('gradebook.html', course=platform.get_course(course_id))
+
+@app.route("/auth/token", methods=['POST'])
+def get_access_token():
+    assertion_jwt = request.form['assertion']
+    client_id = jwt.decode(assertion_jwt, verify=False)['iss']
+    tool = platform.get_tool(client_id)
+    assertion = jwt.decode(assertion_jwt, 
+                           tool.getPublicKey().exportKey(), 
+                           algorithms=['RS256'],
+                           aud='{0}/auth/token'.format(request.url_root.rstrip('/')))
+    return jsonify({
+        "access_token" : "dkj4985kjaIAJDJ89kl8rkn5",
+        "token_type" : "Bearer",
+        "expires_in" : 3600
+    })
+
