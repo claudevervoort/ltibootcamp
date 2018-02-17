@@ -31,7 +31,7 @@ class ResourceLink(object):
         self.id = str(uuid.uuid1())
         self.description = description
         self.url = url
-        self.lineitem = linetem
+        self.lineitem = lineitem
         self.params = params
 
     def addToMessage(self, message):
@@ -78,7 +78,7 @@ class Course(object):
             self.links.append(rl)
 
     def getOneGradableLinkId(self):
-        gradables = list(filter(lambda r: r.lineitem, self.links)))
+        gradables = list(filter(lambda r: r.lineitem, self.links))
         if (gradables):
             return gradables[0].id
         raise Exception("no gradable resource link")

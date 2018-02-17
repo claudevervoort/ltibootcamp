@@ -1,7 +1,8 @@
-from flask import Flask, jsonify, request, render_template, redirect, send_from_directory
+from flask import Flask, jsonify, request, render_template, redirect, send_from_directory, abort
 from ltiplatform.ltiplatform_manager import LTIPlatform
 from keys import keys_manager
 from random import randrange
+from accesstoken.token_manager import check_token, new_token
 import jwt
 
 platform = LTIPlatform('http://localhost:5000')
@@ -87,16 +88,23 @@ def show_gradebook(course_id):
 
 @app.route("/auth/token", methods=['POST'])
 def get_access_token():
-    assertion_jwt = request.form['assertion']
+    if request.form['client_assertion_type'] != 'urn:ietf:params:oauth:client-assertion-type:jwt-bearer':
+        abort(400)
+    if request.form['frant_type'] != 'client_credentials':
+        abort(400)
+    requested_scopes = request.form.get('scope', '*').split(' ')
+    assertion_jwt = request.form['client_assertion']
     client_id = jwt.decode(assertion_jwt, verify=False)['iss']
     tool = platform.get_tool(client_id)
-    assertion = jwt.decode(assertion_jwt, 
-                           tool.getPublicKey().exportKey(), 
-                           algorithms=['RS256'],
-                           aud='{0}/auth/token'.format(request.url_root.rstrip('/')))
+    jwt.decode(assertion_jwt, 
+               tool.getPublicKey().exportKey(), 
+               algorithms=['RS256'],
+               aud='{0}/auth/token'.format(request.url_root.rstrip('/')))
+    
+    access_token = new_token(client_id, requested_scopes)
     return jsonify({
-        "access_token" : "dkj4985kjaIAJDJ89kl8rkn5",
+        "access_token" : access_token.id,
         "token_type" : "Bearer",
-        "expires_in" : 3600
+        "expires_in" : access_token.expires_in
     })
 
