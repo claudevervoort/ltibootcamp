@@ -67,7 +67,8 @@ def content_item_return(context_id):
 @app.route("/tool/<tool_id>/context/<context_id>/studentlaunch")
 def student_launch(tool_id, context_id):
     course = platform.get_course(context_id)
-    rlid = request.args.get('rlid', course.getOneGradableLinkId() )
+    rlid = request.args.get('rlid', '' )
+    rlid = rlid if rlid else course.getOneGradableLinkId()
     resource_link = course.getResourceLink(rlid)
     return platform.get_tool(tool_id).token('LTIResourceLinkLaunch', 
                                             course, 
@@ -90,7 +91,7 @@ def show_gradebook(course_id):
 def get_access_token():
     if request.form['client_assertion_type'] != 'urn:ietf:params:oauth:client-assertion-type:jwt-bearer':
         abort(400)
-    if request.form['frant_type'] != 'client_credentials':
+    if request.form['grant_type'] != 'client_credentials':
         abort(400)
     requested_scopes = request.form.get('scope', '*').split(' ')
     assertion_jwt = request.form['client_assertion']
@@ -99,7 +100,7 @@ def get_access_token():
     jwt.decode(assertion_jwt, 
                tool.getPublicKey().exportKey(), 
                algorithms=['RS256'],
-               aud='{0}/auth/token'.format(request.url_root.rstrip('/')))
+               audience='{0}/auth/token'.format(request.url_root.rstrip('/')))
     
     access_token = new_token(client_id, requested_scopes)
     return jsonify({

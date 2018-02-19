@@ -35,7 +35,7 @@ class Tool(object):
                 "document_target": "iframe",
                 "return_url": root_url + return_url
             },
-            'http://imsglobal.org/lti/token': root_url + "/auth/token",
+            'http://imsglobal.org/lti/tokenendpoint': root_url + "/auth/token",
         })
         ags_claim = {
             'scope': ["http://imsglobal.org/ags/lineitem",

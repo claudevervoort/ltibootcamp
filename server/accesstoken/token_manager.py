@@ -23,7 +23,7 @@ class Token:
 
 def new_token(client_id, allowed_scopes):
     token = Token(client_id, allowed_scopes)
-    tokens[token.id, token]
+    tokens[token.id] = token
     return token
 
 def check_token(*required_scopes):

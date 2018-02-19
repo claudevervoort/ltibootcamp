@@ -78,7 +78,8 @@ class Course(object):
             self.links.append(rl)
 
     def getOneGradableLinkId(self):
-        gradables = list(filter(lambda r: r.lineitem, self.links))
+        gradables = list(filter(lambda r: True if r.lineitem else False, self.links))
+        print(self.links)
         if (gradables):
             return gradables[0].id
         raise Exception("no gradable resource link")
