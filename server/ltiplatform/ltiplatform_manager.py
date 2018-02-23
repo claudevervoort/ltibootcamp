@@ -50,7 +50,7 @@ class Tool(object):
         if resource_link:
             message = resource_link.addToMessage(message)
             if resource_link.lineitem:
-                ags_claim['lineitem'] = '{0}/{1}/lineitems/{2}'.format(root_url, course.id, resource_link.lineitem.id)
+                ags_claim['lineitem'] = '{0}/{1}/lineitems/{2}/lineitem'.format(root_url, course.id, resource_link.lineitem.id)
 
         message['http://imsglobal.org/lti/ags'] = ags_claim     
         message = self.platform.addToMessage(message)

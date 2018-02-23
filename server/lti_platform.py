@@ -109,3 +109,7 @@ def get_access_token():
         "expires_in" : access_token.expires_in
     })
 
+@app.route("/<context_id>/lineitems/<item_id>/lineitem/scores", methods=['POST'])
+@check_token('http://imsglobal.org/ags/score/publish')
+def save_score(context_id=None, item_id=None, client_id=None):
+    return context_id

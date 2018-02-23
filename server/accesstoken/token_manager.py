@@ -1,7 +1,8 @@
 from functools import wraps
 import uuid
+import base64
 from time import time
-from flask import request
+from flask import request, abort
 
 tokens = {}
 
@@ -31,6 +32,16 @@ def check_token(*required_scopes):
     def decorator(func):
         @wraps(func)
         def wrapper(*args, **kwargs):
-            return func(*args, **kwargs)
+            print(request.headers['Authorization'])
+            auth = request.headers.get('Authorization', '').split(' ')
+            if len(auth) != 2 or auth[0] != 'Bearer':
+                abort(403)
+            token = Token('sss', [])
+            #token = tokens[base64.b64decode(auth[1]).decode()]
+            #if not(token and token.check(required_scopes)):
+            #    abort(403)
+            print(len(args))
+            print(kwargs)
+            return func(*args, {**kwargs, 'client_id': token.client_id})
         return wrapper
     return decorator
