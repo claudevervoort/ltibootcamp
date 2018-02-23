@@ -10,12 +10,16 @@ class Token:
 
     def __init__(self, client_id, allowed_scopes):
         self.client_id = client_id
-        self.allowed_scopes = allowed_scopes
+        self.allowed_scopes = allowed_scopes.split(' ')
         self.id = 'tk' + str(uuid.uuid1())
         self.created_time = int(time())
 
     def check(self, *required_scopes):
-        return True
+        for scope in required_scopes[0]:
+            print(scope)
+            if scope in self.allowed_scopes:
+                return True
+        return False
 
     @property
     def expires_in(self):
@@ -32,16 +36,16 @@ def check_token(*required_scopes):
     def decorator(func):
         @wraps(func)
         def wrapper(*args, **kwargs):
-            print(request.headers['Authorization'])
             auth = request.headers.get('Authorization', '').split(' ')
+            # the reason for 403 is just for debug, in prod system it should not be explained why
             if len(auth) != 2 or auth[0] != 'Bearer':
-                abort(403)
-            token = Token('sss', [])
-            #token = tokens[base64.b64decode(auth[1]).decode()]
-            #if not(token and token.check(required_scopes)):
-            #    abort(403)
-            print(len(args))
-            print(kwargs)
-            return func(*args, {**kwargs, 'client_id': token.client_id})
+                abort(403, 'No Authorization')
+            token = tokens[base64.b64decode(auth[1]).decode()]
+            if not token:
+                abort(403, 'No such token')
+            if not token.check(required_scopes):
+                print('Scope mismatch')
+                abort(403, 'Invalid token - scope')
+            return func(*args, **{**kwargs, 'client_id': token.client_id})
         return wrapper
     return decorator

@@ -9,6 +9,7 @@ platform = LTIPlatform('http://localhost:5000')
 app = Flask(__name__)
 course_by_tool = {}
 
+
 @app.route('/assets/<path:path>')
 def send_js(path):
     return send_from_directory('assets', path)
@@ -93,7 +94,8 @@ def get_access_token():
         abort(400)
     if request.form['grant_type'] != 'client_credentials':
         abort(400)
-    requested_scopes = request.form.get('scope', '*').split(' ')
+    if not request.form.get('scope'):
+        abort(400)
     assertion_jwt = request.form['client_assertion']
     client_id = jwt.decode(assertion_jwt, verify=False)['iss']
     tool = platform.get_tool(client_id)
@@ -102,7 +104,7 @@ def get_access_token():
                algorithms=['RS256'],
                audience='{0}/auth/token'.format(request.url_root.rstrip('/')))
     
-    access_token = new_token(client_id, requested_scopes)
+    access_token = new_token(client_id, request.form['scope'])
     return jsonify({
         "access_token" : access_token.id,
         "token_type" : "Bearer",
@@ -112,4 +114,5 @@ def get_access_token():
 @app.route("/<context_id>/lineitems/<item_id>/lineitem/scores", methods=['POST'])
 @check_token('http://imsglobal.org/ags/score/publish')
 def save_score(context_id=None, item_id=None, client_id=None):
+    print('{0} - {1} - {2}'.format(context_id, item_id, client_id))
     return context_id
