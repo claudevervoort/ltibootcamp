@@ -2,31 +2,104 @@ from users.user_manager import Roster
 import uuid
 from time import time
 
+class Result(object):
+
+    def __init__(self, lineitem, user_id, score, max, grading_progress, comment, timestamp):
+        self.lineitem = lineitem
+        self.user_id = user_id
+        self.score = score
+        self.max = max
+        self.grading_progress = grading_progress
+        self.comment = comment
+
+    @classmethod
+    def from_score(cls, lineitem, score):
+        return cls(lineitem, 
+                      score['userId'], 
+                      score.get('scoreGiven'), 
+                      score.get('scoreMaximum'), 
+                      score['gradingProgress'],
+                      score.get('comment'),
+                      score['timestamp'])
+
+    def to_json(self):
+        r = {
+            'userId': self.user_id
+        }
+        if self.score:
+            r['resultScore'] = self.scaled_score
+            r['resultMaximum'] = self.lineitem.max
+        if self.comment:
+            r['comment'] = self.comment
+        return r
+
+    @property
+    def scaled_score(self):
+        if self.score:
+            if self.max == self.lineitem.max:
+                return self.score
+            else:
+                return self.score/self.max*self.lineitem.max
+        return None
+
+
 class LineItem(object):
 
-    def __init__(self, id, maximum, label, resource_id, tag):
+    def __init__(self, tool, course, id, maximum, label, resource_id, tag):
         self.id = id
-        self.score_maximum = maximum
+        self.course = course
+        self.tool = tool
+        self.max = maximum
         self.label = label
         self.resource_id = resource_id
         self.tag = tag
-        self.results = []
+        self.results = {}
+
+    def save_score(self, score):
+        #check prior value timestamp here
+        self.results[score['userId']]=Result.from_score(self, score)
+
+    @property
+    def relative_url(self):
+        return "/{0}/lineitems/{2}/lineitem".format(self.course.id, self.id)
 
     @classmethod
-    def from_json(cls, li, id=1, label=''):
+    def from_json(cls, tool, course, li, id=1, label=''):
         label = li.get('label', label)
         score_maximum = li['scoreMaximum']
         resource_id = li.get('resourceId', '')
         tag = li.get('tag', '')
-        return cls(id, score_maximum, label, resource_id, tag)
+        return cls(tool, course, id, score_maximum, label, resource_id, tag)
 
     def getScaledResult(self, user_id):
         return ''
 
+    def get_json(self, base_url):
+        l = {
+            'id': base_url + self.relative_url,
+            'scoreMaximum': self.max
+        }
+        if self.resource_id:
+            l['ltiLinkId'] = self.resource_id
+        if self.tag:
+            l['tag'] = self.tag
+        if self.resource_id:
+            l['resourceId'] = self.resource_id
+        if self.label:
+            l['label'] = self.label
+        return l
+
+    def update_from_json(self, json):
+        self.label = json.get('label', '')
+        self.resource_id = json.get('resource_id', None)
+        self.tag = json.get('tag', None)
+        self.max = json['scoreMaximum']
+
 
 class ResourceLink(object):
 
-    def __init__(self, label, description, url, params, lineitem=None):
+    def __init__(self, tool, label, description, url, params, lineitem=None):
+        self.tool = tool
         self.label = label
         self.id = str(uuid.uuid1())
         self.description = description
@@ -65,15 +138,15 @@ class Course(object):
         })
         return message
 
-    def addResourceLinks(self, content_items):
+    def addResourceLinks(self, tool, content_items):
         for item in content_items:
             label = item.get('title', '')
             description = item.get('text', '')
             url = item.get('url', '')
             custom = item.get('custom', {})
-            rl = ResourceLink(label, description, url, custom)
+            rl = ResourceLink(tool, label, description, url, custom)
             if 'lineItem' in item:
-                rl.lineitem = LineItem.from_json(item['lineItem'], id=(len(self.lineitems) + 1))
+                rl.lineitem = LineItem.from_json(tool, self, item['lineItem'], id=(len(self.lineitems) + 1))
                 self.lineitems.append(rl.lineitem)
             self.links.append(rl)
 
@@ -89,4 +162,17 @@ class Course(object):
         if (match):
             return match[0]
         raise KeyError('No such link ' + rlid)
-            
+    
+    def get_lineitem(self, lineitem_id):
+        match = list(filter(lambda r: str(r.id) == str(lineitem_id), self.lineitems))
+        if (match):
+            return match[0]
+        raise KeyError('No such lineitem ' + lineitem_id)
+
+    def add_lineitem(self, tool, json):
+        lineitem = LineItem.from_json(tool, self, json, id=(len(self.lineitems) + 1))
+        self.lineitems.append(lineitem)
+        return lineitem
+
+    def remove_lineitem(self, item_id):
+        self.lineitems = list(filter(lambda li: li.id != item_id, self.lineitems))

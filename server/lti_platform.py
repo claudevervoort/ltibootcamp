@@ -61,7 +61,7 @@ def content_item_return(context_id):
        audience=request.url_root.rstrip('/'))
     if ('http://imsglobal.org/lti/content_items' in deep_linking_res):
         content_items = deep_linking_res['http://imsglobal.org/lti/content_items']
-        platform.get_course(context_id).addResourceLinks(content_items)
+        platform.get_course(context_id).addResourceLinks(tool, content_items)
     return redirect('/course/'+context_id, code=302)
 
 
@@ -111,8 +111,69 @@ def get_access_token():
         "expires_in" : access_token.expires_in
     })
 
+def get_and_check_lineitem(context_id, item_id, client_id):
+    tool = platform.get_tool(client_id)
+    course = platform.get_course(context_id)
+    lineitem = course.get_lineitem(item_id)
+    if not tool == lineitem.tool:
+        abort(403, 'Lineitem does not belong to tool making the request')
+    return lineitem
+
 @app.route("/<context_id>/lineitems/<item_id>/lineitem/scores", methods=['POST'])
 @check_token('http://imsglobal.org/ags/score/publish')
 def save_score(context_id=None, item_id=None, client_id=None):
-    print('{0} - {1} - {2}'.format(context_id, item_id, client_id))
-    return context_id
+    # we are not checking media type because the URL is enough of a discriminator
+    score = request.get_json()
+    lineitem = get_and_check_lineitem(context_id,item_id, client_id)
+    lineitem.save_score(score)
+    return ''
+
+@app.route("/<context_id>/lineitems/<item_id>/lineitem/results", methods=['GET'])
+@check_token('http://imsglobal.org/ags/results/get')
+def get_results(context_id=None, item_id=None, client_id=None):
+    # we are not checking media type because the URL is enough of a discriminator
+    lineitem = get_and_check_lineitem(context_id,item_id, client_id)
+    results = list(map(lambda r: r[1].to_json(), lineitem.results.items()))
+    return jsonify(results)
+
+@app.route("/<context_id>/lineitems/<item_id>/lineitem", methods=['GET'])
+@check_token('http://imsglobal.org/ags/results/get')
+def get_lineitem(context_id=None, item_id=None, client_id=None):
+    # we are not checking media type because the URL is enough of a discriminator
+    lineitem = get_and_check_lineitem(context_id,item_id, client_id)
+    return jsonify(lineitem.to_json(request.root_url.rstrip('/')))
+
+@app.route("/<context_id>/lineitems/<item_id>/lineitem", methods=['PUT'])
+@check_token('http://imsglobal.org/ags/results/get')
+def update_lineitem(context_id=None, item_id=None, client_id=None):
+    # we are not checking media type because the URL is enough of a discriminator
+    lineitem = get_and_check_lineitem(context_id,item_id, client_id)
+    lineitem.update_from_json(request.get_json())
+    return jsonify(lineitem.to_json(request.root_url.rstrip('/')))
+
+@app.route("/<context_id>/lineitems/<item_id>/lineitem", methods=['DELETE'])
+@check_token('http://imsglobal.org/ags/results/get')
+def delete_lineitem(context_id=None, item_id=None, client_id=None):
+    # we are not checking media type because the URL is enough of a discriminator
+    lineitem = get_and_check_lineitem(context_id,item_id, client_id)
+    lineitem.course.remove_lineitem(item_id)
+    return ''
+
+@app.route("/<context_id>/lineitems", methods=['GET'])
+@check_token('http://imsglobal.org/ags/lineitem')
+def get_lineitems(context_id=None, client_id=None):
+    # we are not checking media type because the URL is enough of a discriminator
+    tool = platform.get_tool(client_id)
+    course = platform.get_course(context_id)
+    root_url = request.root_url.rstrip('/')
+    results = list(map(lambda l: l.to_json(root_url), filter(lambda l: l.tool==tool, course.lineitems)))
+    return jsonify(results)
+
+@app.route("/<context_id>/lineitems", methods=['POST'])
+@check_token('http://imsglobal.org/ags/lineitem')
+def add_lineitem(context_id=None, client_id=None):
+    # we are not checking media type because the URL is enough of a discriminator
+    tool = platform.get_tool(client_id)
+    course = platform.get_course(context_id)
+    lineitem = course.add_lineitem(request.get_json())
+    return jsonify(lineitem.to_json(request.root_url.rstrip('/')))
