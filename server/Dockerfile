@@ -1,6 +1,6 @@
 FROM python:latest
 
-ADD server /app
+ADD ./ /app
 
 WORKDIR /app
 
