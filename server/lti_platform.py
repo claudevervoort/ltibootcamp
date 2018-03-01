@@ -28,8 +28,9 @@ def newtool():
     platform.url = request.url_root
     course_by_tool[tool.client_id] = platform.new_course()
     return jsonify({
+        'accesstoken_endpoint': request.url_root.rstrip('/') + '/auth/token',
+        'keyset_url': request.url_root.rstrip('/') + '/.well-known/jwks.json',
         'client_id': tool.client_id,
-        'deployment_id': tool.deployment_id,
         'webkey': tool.key['webkey'],
         'webkeyPem': tool.key['key'].exportKey().decode('utf-8')
     })
@@ -120,7 +121,7 @@ def get_and_check_lineitem(context_id, item_id, client_id):
     return lineitem
 
 @app.route("/<context_id>/lineitems/<item_id>/lineitem/scores", methods=['POST'])
-@check_token('http://imsglobal.org/ags/score/publish')
+@check_token('https://imsglobal.org/lti/ags/score')
 def save_score(context_id=None, item_id=None, client_id=None):
     # we are not checking media type because the URL is enough of a discriminator
     score = request.get_json()
@@ -129,7 +130,7 @@ def save_score(context_id=None, item_id=None, client_id=None):
     return ''
 
 @app.route("/<context_id>/lineitems/<item_id>/lineitem/results", methods=['GET'])
-@check_token('http://imsglobal.org/ags/results/get')
+@check_token('https://imsglobal.org/lti/ags/results.readonly')
 def get_results(context_id=None, item_id=None, client_id=None):
     # we are not checking media type because the URL is enough of a discriminator
     lineitem = get_and_check_lineitem(context_id,item_id, client_id)
@@ -137,14 +138,14 @@ def get_results(context_id=None, item_id=None, client_id=None):
     return jsonify(results)
 
 @app.route("/<context_id>/lineitems/<item_id>/lineitem", methods=['GET'])
-@check_token('http://imsglobal.org/ags/results/get')
+@check_token('https://imsglobal.org/lti/ags/lineitem', 'https://imsglobal.org/lti/ags/lineitem.readonly')
 def get_lineitem(context_id=None, item_id=None, client_id=None):
     # we are not checking media type because the URL is enough of a discriminator
     lineitem = get_and_check_lineitem(context_id,item_id, client_id)
     return jsonify(lineitem.to_json(request.root_url.rstrip('/')))
 
 @app.route("/<context_id>/lineitems/<item_id>/lineitem", methods=['PUT'])
-@check_token('http://imsglobal.org/ags/results/get')
+@check_token('https://imsglobal.org/lti/ags/lineitem')
 def update_lineitem(context_id=None, item_id=None, client_id=None):
     # we are not checking media type because the URL is enough of a discriminator
     lineitem = get_and_check_lineitem(context_id,item_id, client_id)
@@ -152,7 +153,7 @@ def update_lineitem(context_id=None, item_id=None, client_id=None):
     return jsonify(lineitem.to_json(request.root_url.rstrip('/')))
 
 @app.route("/<context_id>/lineitems/<item_id>/lineitem", methods=['DELETE'])
-@check_token('http://imsglobal.org/ags/results/get')
+@check_token('https://imsglobal.org/lti/ags/lineitem')
 def delete_lineitem(context_id=None, item_id=None, client_id=None):
     # we are not checking media type because the URL is enough of a discriminator
     lineitem = get_and_check_lineitem(context_id,item_id, client_id)
@@ -160,7 +161,7 @@ def delete_lineitem(context_id=None, item_id=None, client_id=None):
     return ''
 
 @app.route("/<context_id>/lineitems", methods=['GET'])
-@check_token('http://imsglobal.org/ags/lineitem')
+@check_token('https://imsglobal.org/lti/ags/lineitem', 'https://imsglobal.org/lti/ags/lineitem.readonly')
 def get_lineitems(context_id=None, client_id=None):
     # we are not checking media type because the URL is enough of a discriminator
     tool = platform.get_tool(client_id)
@@ -170,7 +171,7 @@ def get_lineitems(context_id=None, client_id=None):
     return jsonify(results)
 
 @app.route("/<context_id>/lineitems", methods=['POST'])
-@check_token('http://imsglobal.org/ags/lineitem')
+@check_token('https://imsglobal.org/lti/ags/lineitem')
 def add_lineitem(context_id=None, client_id=None):
     # we are not checking media type because the URL is enough of a discriminator
     tool = platform.get_tool(client_id)

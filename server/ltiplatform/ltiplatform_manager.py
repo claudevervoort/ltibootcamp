@@ -34,13 +34,12 @@ class Tool(object):
             'http://imsglobal.org/lti/launch_presentation': {
                 "document_target": "iframe",
                 "return_url": root_url + return_url
-            },
-            'http://imsglobal.org/lti/tokenendpoint': root_url + "/auth/token",
+            }
         })
         ags_claim = {
-            'scope': ["http://imsglobal.org/ags/lineitem",
-                        "http://imsglobal.org/ags/result/read",
-                        "http://imsglobal.org/ags/score/publish",
+            'scope': ["https://imsglobal.org/lti/ags/lineitem",
+                        "https://imsglobal.org/lti/ags/result.readonly",
+                        "https://imsglobal.org/lti/ags/score"
                         ],
             'lineitems': '{0}/{1}/lineitems'.format(root_url, course.id) 
         }
