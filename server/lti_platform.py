@@ -9,6 +9,8 @@ platform = LTIPlatform('http://localhost:5000')
 app = Flask(__name__)
 course_by_tool = {}
 
+def url_root():
+    return request.url_root.rstrip('/')
 
 @app.route('/assets/<path:path>')
 def send_js(path):
@@ -142,7 +144,7 @@ def get_results(context_id=None, item_id=None, client_id=None):
 def get_lineitem(context_id=None, item_id=None, client_id=None):
     # we are not checking media type because the URL is enough of a discriminator
     lineitem = get_and_check_lineitem(context_id,item_id, client_id)
-    return jsonify(lineitem.to_json(request.root_url.rstrip('/')))
+    return jsonify(lineitem.to_json(url_root()))
 
 @app.route("/<context_id>/lineitems/<item_id>/lineitem", methods=['PUT'])
 @check_token('https://imsglobal.org/lti/ags/lineitem')
@@ -150,7 +152,7 @@ def update_lineitem(context_id=None, item_id=None, client_id=None):
     # we are not checking media type because the URL is enough of a discriminator
     lineitem = get_and_check_lineitem(context_id,item_id, client_id)
     lineitem.update_from_json(request.get_json())
-    return jsonify(lineitem.to_json(request.root_url.rstrip('/')))
+    return jsonify(lineitem.to_json(url_root()))
 
 @app.route("/<context_id>/lineitems/<item_id>/lineitem", methods=['DELETE'])
 @check_token('https://imsglobal.org/lti/ags/lineitem')
@@ -166,8 +168,7 @@ def get_lineitems(context_id=None, client_id=None):
     # we are not checking media type because the URL is enough of a discriminator
     tool = platform.get_tool(client_id)
     course = platform.get_course(context_id)
-    root_url = request.root_url.rstrip('/')
-    results = list(map(lambda l: l.to_json(root_url), filter(lambda l: l.tool==tool, course.lineitems)))
+    results = list(map(lambda l: l.get_json(url_root()), filter(lambda l: l.tool==tool, course.lineitems)))
     return jsonify(results)
 
 @app.route("/<context_id>/lineitems", methods=['POST'])
@@ -176,5 +177,5 @@ def add_lineitem(context_id=None, client_id=None):
     # we are not checking media type because the URL is enough of a discriminator
     tool = platform.get_tool(client_id)
     course = platform.get_course(context_id)
-    lineitem = course.add_lineitem(request.get_json())
-    return jsonify(lineitem.to_json(request.root_url.rstrip('/')))
+    lineitem = course.add_lineitem(tool, request.get_json())
+    return jsonify(lineitem.get_json(url_root()))
