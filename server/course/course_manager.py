@@ -34,6 +34,10 @@ class Result(object):
         return r
 
     @property
+    def needs_grading(self):
+        return self.grading_progress == 'PendingManual'
+    
+    @property
     def scaled_score(self):
         if self.score:
             if self.max == self.lineitem.max:
@@ -73,7 +77,8 @@ class LineItem(object):
         return cls(tool, course, id, score_maximum, label, resource_id, tag, resource_link=resource_link)
 
     def getScaledResult(self, user_id):
-        return ''
+        s = self.results.get(user_id)
+        return s.scaled_score if s else None
 
     def get_json(self, base_url):
         l = {

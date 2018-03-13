@@ -19,7 +19,7 @@
                         <tr>
                         <th scope="col">Name</th>
                         {% for li in course.lineitems%}
-                        <th scope="col">{{ li.label }} ({{ li.score_maximum }} pts)</th>
+                        <th scope="col">{{ li.label }} ({{ li.max }} pts)</th>
                         {% endfor %}
                         </tr>
                     </thead>
@@ -28,7 +28,11 @@
                         <tr>
                             <th scope="row">{{ member.user.fullname }}</th>
                             {% for li in course.lineitems%}
-                            <td>{{li.getScaledResult(member.user.id)}}</td>
+                            <td>{{li.getScaledResult(member.user.id)}}
+                                {%if li.results.get(member.user.id) and li.results.get(member.user.id).needs_grading %}
+                                NG
+                                {% endif %}
+                            </td>
                             {% endfor %}
                         </tr>
                         {% endfor %}

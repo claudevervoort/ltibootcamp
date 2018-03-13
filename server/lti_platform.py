@@ -144,7 +144,7 @@ def get_results(context_id=None, item_id=None, client_id=None):
 def get_lineitem(context_id=None, item_id=None, client_id=None):
     # we are not checking media type because the URL is enough of a discriminator
     lineitem = get_and_check_lineitem(context_id,item_id, client_id)
-    return jsonify(lineitem.to_json(url_root()))
+    return jsonify(lineitem.get_json(url_root()))
 
 @app.route("/<context_id>/lineitems/<item_id>/lineitem", methods=['PUT'])
 @check_token('https://imsglobal.org/lti/ags/lineitem')
@@ -152,7 +152,7 @@ def update_lineitem(context_id=None, item_id=None, client_id=None):
     # we are not checking media type because the URL is enough of a discriminator
     lineitem = get_and_check_lineitem(context_id,item_id, client_id)
     lineitem.update_from_json(request.get_json())
-    return jsonify(lineitem.to_json(url_root()))
+    return jsonify(lineitem.get_json(url_root()))
 
 @app.route("/<context_id>/lineitems/<item_id>/lineitem", methods=['DELETE'])
 @check_token('https://imsglobal.org/lti/ags/lineitem')
