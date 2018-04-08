@@ -51,7 +51,7 @@ def content_item_launch(tool_id):
         }
     }
     return_url = "/tool/{0}/cir".format(course.id)
-    return platform.get_tool(tool_id).token('LTIDeepLinkingRequest', course, instructor, message, return_url, request_url=request.url_root)
+    return platform.get_tool(tool_id).message('LTIDeepLinkingRequest', course, instructor, message, return_url, request_url=request.url_root)
 
 @app.route("/tool/<context_id>/cir", methods=['POST'])
 def content_item_return(context_id):
@@ -74,7 +74,7 @@ def student_launch(tool_id, context_id):
     rlid = request.args.get('rlid', '' )
     rlid = rlid if rlid else course.getOneGradableLinkId()
     resource_link = course.getResourceLink(rlid)
-    return platform.get_tool(tool_id).token('LTIResourceLinkLaunch', 
+    return platform.get_tool(tool_id).message('LTIResourceLinkLaunch', 
                                             course, 
                                             course.roster.getOneStudent(), 
                                             {}, 
@@ -179,3 +179,11 @@ def add_lineitem(context_id=None, client_id=None):
     course = platform.get_course(context_id)
     lineitem = course.add_lineitem(tool, request.get_json())
     return jsonify(lineitem.get_json(url_root()))
+
+@app.route("/<context_id>/memberships", methods=['GET'])
+@check_token('https://imsglobal.org/lti/memberships.readonly')
+def get_memberships(context_id=None, client_id=None):
+    # we are not checking media type because the URL is enough of a discriminator
+    tool = platform.get_tool(client_id)
+    course = platform.get_course(context_id)
+    return jsonify(course.get_roster().to_json(url_root()))

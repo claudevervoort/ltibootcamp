@@ -17,7 +17,7 @@ class Tool(object):
     def getPublicKey(self):
         return self.key['key'].publickey()
 
-    def token(self, messageType, course, member, message, return_url, request_url=None, resource_link=None):
+    def message(self, messageType, course, member, message, return_url, request_url=None, resource_link=None):
         key = keys[randrange(0, len(keys))]
         privatekey = key[1].exportKey()
         now = int(time())
@@ -43,6 +43,9 @@ class Tool(object):
                         ],
             'lineitems': '{0}/{1}/lineitems'.format(root_url, course.id) 
         }
+        memberships_claim = {
+            'context_memberships_url': '{0}/{1}/memberships'.format(root_url, course.id)
+        }
         message = member.addToMessage(message)
         message = course.addToMessage(message)
         
@@ -51,7 +54,8 @@ class Tool(object):
             if resource_link.lineitem:
                 ags_claim['lineitem'] = '{0}/{1}/lineitems/{2}/lineitem'.format(root_url, course.id, resource_link.lineitem.id)
 
-        message['http://imsglobal.org/lti/ags'] = ags_claim     
+        message['http://imsglobal.org/lti/ags'] = ags_claim    
+        message['https://purl.imsglobal.org/lti/claim/namesroleservice'] = memberships_claim 
         message = self.platform.addToMessage(message)
         return jwt.encode(message, privatekey, algorithm='RS256', headers={'kid':key[0]})
 

@@ -134,7 +134,7 @@ class Course(object):
             'title': name,
             'type': ['CourseSection']
         }
-        self.roster = Roster()
+        self.roster = Roster(self)
         self.lineitems = []
         self.links = []
 
@@ -168,7 +168,10 @@ class Course(object):
         if (match):
             return match[0]
         raise KeyError('No such link ' + rlid)
-    
+
+    def get_roster(self):
+        return self.roster
+
     def get_lineitem(self, lineitem_id):
         match = list(filter(lambda r: str(r.id) == str(lineitem_id), self.lineitems))
         if (match):
