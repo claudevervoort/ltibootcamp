@@ -9,6 +9,8 @@ platform = LTIPlatform('http://localhost:5000')
 app = Flask(__name__)
 course_by_tool = {}
 
+def url_root():
+    return request.url_root.rstrip('/')
 
 @app.route('/assets/<path:path>')
 def send_js(path):
@@ -28,8 +30,9 @@ def newtool():
     platform.url = request.url_root
     course_by_tool[tool.client_id] = platform.new_course()
     return jsonify({
+        'accesstoken_endpoint': request.url_root.rstrip('/') + '/auth/token',
+        'keyset_url': request.url_root.rstrip('/') + '/.well-known/jwks.json',
         'client_id': tool.client_id,
-        'deployment_id': tool.deployment_id,
         'webkey': tool.key['webkey'],
         'webkeyPem': tool.key['key'].exportKey().decode('utf-8')
     })
@@ -48,7 +51,7 @@ def content_item_launch(tool_id):
         }
     }
     return_url = "/tool/{0}/cir".format(course.id)
-    return platform.get_tool(tool_id).token('LTIDeepLinkingRequest', course, instructor, message, return_url, request_url=request.url_root)
+    return platform.get_tool(tool_id).message('LTIDeepLinkingRequest', course, instructor, message, return_url, request_url=request.url_root)
 
 @app.route("/tool/<context_id>/cir", methods=['POST'])
 def content_item_return(context_id):
@@ -71,7 +74,7 @@ def student_launch(tool_id, context_id):
     rlid = request.args.get('rlid', '' )
     rlid = rlid if rlid else course.getOneGradableLinkId()
     resource_link = course.getResourceLink(rlid)
-    return platform.get_tool(tool_id).token('LTIResourceLinkLaunch', 
+    return platform.get_tool(tool_id).message('LTIResourceLinkLaunch', 
                                             course, 
                                             course.roster.getOneStudent(), 
                                             {}, 
@@ -120,7 +123,7 @@ def get_and_check_lineitem(context_id, item_id, client_id):
     return lineitem
 
 @app.route("/<context_id>/lineitems/<item_id>/lineitem/scores", methods=['POST'])
-@check_token('http://imsglobal.org/ags/score/publish')
+@check_token('https://imsglobal.org/lti/ags/score')
 def save_score(context_id=None, item_id=None, client_id=None):
     # we are not checking media type because the URL is enough of a discriminator
     score = request.get_json()
@@ -129,7 +132,7 @@ def save_score(context_id=None, item_id=None, client_id=None):
     return ''
 
 @app.route("/<context_id>/lineitems/<item_id>/lineitem/results", methods=['GET'])
-@check_token('http://imsglobal.org/ags/results/get')
+@check_token('https://imsglobal.org/lti/ags/results.readonly')
 def get_results(context_id=None, item_id=None, client_id=None):
     # we are not checking media type because the URL is enough of a discriminator
     lineitem = get_and_check_lineitem(context_id,item_id, client_id)
@@ -137,22 +140,22 @@ def get_results(context_id=None, item_id=None, client_id=None):
     return jsonify(results)
 
 @app.route("/<context_id>/lineitems/<item_id>/lineitem", methods=['GET'])
-@check_token('http://imsglobal.org/ags/results/get')
+@check_token('https://imsglobal.org/lti/ags/lineitem', 'https://imsglobal.org/lti/ags/lineitem.readonly')
 def get_lineitem(context_id=None, item_id=None, client_id=None):
     # we are not checking media type because the URL is enough of a discriminator
     lineitem = get_and_check_lineitem(context_id,item_id, client_id)
-    return jsonify(lineitem.to_json(request.root_url.rstrip('/')))
+    return jsonify(lineitem.get_json(url_root()))
 
 @app.route("/<context_id>/lineitems/<item_id>/lineitem", methods=['PUT'])
-@check_token('http://imsglobal.org/ags/results/get')
+@check_token('https://imsglobal.org/lti/ags/lineitem')
 def update_lineitem(context_id=None, item_id=None, client_id=None):
     # we are not checking media type because the URL is enough of a discriminator
     lineitem = get_and_check_lineitem(context_id,item_id, client_id)
     lineitem.update_from_json(request.get_json())
-    return jsonify(lineitem.to_json(request.root_url.rstrip('/')))
+    return jsonify(lineitem.get_json(url_root()))
 
 @app.route("/<context_id>/lineitems/<item_id>/lineitem", methods=['DELETE'])
-@check_token('http://imsglobal.org/ags/results/get')
+@check_token('https://imsglobal.org/lti/ags/lineitem')
 def delete_lineitem(context_id=None, item_id=None, client_id=None):
     # we are not checking media type because the URL is enough of a discriminator
     lineitem = get_and_check_lineitem(context_id,item_id, client_id)
@@ -160,20 +163,36 @@ def delete_lineitem(context_id=None, item_id=None, client_id=None):
     return ''
 
 @app.route("/<context_id>/lineitems", methods=['GET'])
-@check_token('http://imsglobal.org/ags/lineitem')
+@check_token('https://imsglobal.org/lti/ags/lineitem', 'https://imsglobal.org/lti/ags/lineitem.readonly')
 def get_lineitems(context_id=None, client_id=None):
     # we are not checking media type because the URL is enough of a discriminator
     tool = platform.get_tool(client_id)
     course = platform.get_course(context_id)
-    root_url = request.root_url.rstrip('/')
-    results = list(map(lambda l: l.to_json(root_url), filter(lambda l: l.tool==tool, course.lineitems)))
+    results = list(map(lambda l: l.get_json(url_root()), filter(lambda l: l.tool==tool, course.lineitems)))
     return jsonify(results)
 
 @app.route("/<context_id>/lineitems", methods=['POST'])
-@check_token('http://imsglobal.org/ags/lineitem')
+@check_token('https://imsglobal.org/lti/ags/lineitem')
 def add_lineitem(context_id=None, client_id=None):
     # we are not checking media type because the URL is enough of a discriminator
     tool = platform.get_tool(client_id)
     course = platform.get_course(context_id)
-    lineitem = course.add_lineitem(request.get_json())
-    return jsonify(lineitem.to_json(request.root_url.rstrip('/')))
+    lineitem = course.add_lineitem(tool, request.get_json())
+    return jsonify(lineitem.get_json(url_root()))
+
+@app.route("/<context_id>/memberships", methods=['GET'])
+@check_token('https://imsglobal.org/lti/memberships.readonly')
+def get_memberships(context_id=None, client_id=None):
+    # we are not checking media type because the URL is enough of a discriminator
+    tool = platform.get_tool(client_id)
+    course = platform.get_course(context_id)
+    roster = course.get_roster()
+    if ('since' in request.args):
+        roster = roster.since(int(request.args['since']))
+    if ('role' in request.args):
+        roster = roster.role(request.args['role'])
+    if ('limit' in request.args):
+        start = int(request.args.get('from', '0'))
+        limit = int(request.args['limit'])
+        roster = roster.limit(start, limit)
+    return jsonify(roster.to_json(url_root()))

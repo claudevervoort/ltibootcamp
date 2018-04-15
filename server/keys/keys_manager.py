@@ -19,7 +19,7 @@ def get_keyset():
         public_key = key[1].publickey()
         keyset['keys'].append({
             'kty': 'rsa',
-            'alg': 'HS256',
+            'alg': 'RS256',
             'kid': key[0],
             'use': 'sig',
             'e':  base64urlUInt_encode(public_key.e),

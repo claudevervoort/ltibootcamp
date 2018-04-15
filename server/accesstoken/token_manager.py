@@ -40,7 +40,7 @@ def check_token(*required_scopes):
             # the reason for 403 is just for debug, in prod system it should not be explained why
             if len(auth) != 2 or auth[0] != 'Bearer':
                 abort(403, 'No Authorization')
-            token = tokens[base64.b64decode(auth[1]).decode()]
+            token = tokens.get(base64.b64decode(auth[1]).decode())
             if not token:
                 abort(403, 'No such token')
             if not token.check(required_scopes):

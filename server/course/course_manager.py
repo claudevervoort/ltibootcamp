@@ -34,6 +34,10 @@ class Result(object):
         return r
 
     @property
+    def needs_grading(self):
+        return self.grading_progress == 'PendingManual'
+    
+    @property
     def scaled_score(self):
         if self.score:
             if self.max == self.lineitem.max:
@@ -45,7 +49,7 @@ class Result(object):
 
 class LineItem(object):
 
-    def __init__(self, tool, course, id, maximum, label, resource_id, tag):
+    def __init__(self, tool, course, id, maximum, label, resource_id, tag, resource_link = None):
         self.id = id
         self.course = course
         self.tool = tool
@@ -53,6 +57,7 @@ class LineItem(object):
         self.label = label
         self.resource_id = resource_id
         self.tag = tag
+        self.resource_link = resource_link
         self.results = {}
 
     def save_score(self, score):
@@ -61,26 +66,27 @@ class LineItem(object):
 
     @property
     def relative_url(self):
-        return "/{0}/lineitems/{2}/lineitem".format(self.course.id, self.id)
+        return "/{0}/lineitems/{1}/lineitem".format(self.course.id, self.id)
 
     @classmethod
-    def from_json(cls, tool, course, li, id=1, label=''):
+    def from_json(cls, tool, course, li, id=1, label='', resource_link=None):
         label = li.get('label', label)
         score_maximum = li['scoreMaximum']
         resource_id = li.get('resourceId', '')
         tag = li.get('tag', '')
-        return cls(tool, course, id, score_maximum, label, resource_id, tag)
+        return cls(tool, course, id, score_maximum, label, resource_id, tag, resource_link=resource_link)
 
     def getScaledResult(self, user_id):
-        return ''
+        s = self.results.get(user_id)
+        return s.scaled_score if s else None
 
     def get_json(self, base_url):
         l = {
-            'id': base_url + self.relative_url,
+            'id': '{0}{1}'.format(base_url, self.relative_url),
             'scoreMaximum': self.max
         }
-        if self.resource_id:
-            l['ltiLinkId'] = self.resource_id
+        if self.resource_link:
+            l['ltiLinkId'] = self.resource_link.id
         if self.tag:
             l['tag'] = self.tag
         if self.resource_id:
@@ -128,7 +134,7 @@ class Course(object):
             'title': name,
             'type': ['CourseSection']
         }
-        self.roster = Roster()
+        self.roster = Roster.get_random_roster(self)
         self.lineitems = []
         self.links = []
 
@@ -146,7 +152,7 @@ class Course(object):
             custom = item.get('custom', {})
             rl = ResourceLink(tool, label, description, url, custom)
             if 'lineItem' in item:
-                rl.lineitem = LineItem.from_json(tool, self, item['lineItem'], id=(len(self.lineitems) + 1))
+                rl.lineitem = LineItem.from_json(tool, self, item['lineItem'], id=(len(self.lineitems) + 1), resource_link=rl)
                 self.lineitems.append(rl.lineitem)
             self.links.append(rl)
 
@@ -162,7 +168,10 @@ class Course(object):
         if (match):
             return match[0]
         raise KeyError('No such link ' + rlid)
-    
+
+    def get_roster(self):
+        return self.roster
+
     def get_lineitem(self, lineitem_id):
         match = list(filter(lambda r: str(r.id) == str(lineitem_id), self.lineitems))
         if (match):
