@@ -186,4 +186,13 @@ def get_memberships(context_id=None, client_id=None):
     # we are not checking media type because the URL is enough of a discriminator
     tool = platform.get_tool(client_id)
     course = platform.get_course(context_id)
-    return jsonify(course.get_roster().to_json(url_root()))
+    roster = course.get_roster()
+    if ('since' in request.args):
+        roster = roster.since(int(request.args['since']))
+    if ('role' in request.args):
+        roster = roster.role(request.args['role'])
+    if ('limit' in request.args):
+        start = int(request.args.get('from', '0'))
+        limit = int(request.args['limit'])
+        roster = roster.limit(start, limit)
+    return jsonify(roster.to_json(url_root()))

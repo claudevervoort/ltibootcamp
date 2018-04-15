@@ -134,7 +134,7 @@ class Course(object):
             'title': name,
             'type': ['CourseSection']
         }
-        self.roster = Roster(self)
+        self.roster = Roster.get_random_roster(self)
         self.lineitems = []
         self.links = []
 
