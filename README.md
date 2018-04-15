@@ -1,7 +1,13 @@
 # LTI Bootcamp
 
+Text and code together to learn how to use LTI 1.3 advantage
 
-Nothing to see here for now! Still being built up...
+LTI Bootcamp has 2 components:
+
+- Server: an LTI platform simulator, implementing most of LTI 1.3 Advantage
+- Jupyter Notebook: A Jupyter notebook to simulate a Tool interacting with a platform
+
+# Docker to run server
 
 Build a docker image using the provided Dockerfile:
 
