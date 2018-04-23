@@ -92,6 +92,9 @@ class Member(object):
             "role": [self.role]
         }
         return json
+    
+    def resolve_param(self, param):
+        return param
 
 
 class Roster(object):

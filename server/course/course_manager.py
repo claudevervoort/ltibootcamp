@@ -122,6 +122,9 @@ class ResourceLink(object):
             'http://imsglobal.org/lti/custom': self.params
         })
         return message
+    
+    def resolve_param(self, param):
+        return param
 
 
 class Course(object):
@@ -168,6 +171,10 @@ class Course(object):
         if (match):
             return match[0]
         raise KeyError('No such link ' + rlid)
+
+
+    def resolve_param(self, param):
+        return param
 
     def get_roster(self):
         return self.roster

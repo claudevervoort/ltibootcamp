@@ -5,6 +5,7 @@ import jwt
 import uuid
 from course.course_manager import Course 
 from random import randrange
+from ltiplatform.ltiutil import fc
 
 class Tool(object):
 
@@ -53,6 +54,22 @@ class Tool(object):
             message = resource_link.addToMessage(message)
             if resource_link.lineitem:
                 ags_claim['lineitem'] = '{0}/{1}/lineitems/{2}/lineitem'.format(root_url, course.id, resource_link.lineitem.id)
+
+        if fc('custom') in message:
+            custom = message[fc('custom')]
+            resolvers = [course, member]
+            if resource_link:
+                resolvers.append(resource_link)
+            
+            def resolve(item):
+                value = item[1]
+                for resolver in resolvers:
+                    if len(value) == 0 or value[0] != '$':
+                        break
+                    value = resolver.resolve_param(value)
+                return (item[0], value)
+            
+            message[fc('custom')] = dict(map(resolve, custom.items()))
 
         message['http://imsglobal.org/lti/ags'] = ags_claim    
         message['https://purl.imsglobal.org/lti/claim/namesroleservice'] = memberships_claim 
