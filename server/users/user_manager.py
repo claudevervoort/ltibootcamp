@@ -93,7 +93,7 @@ class Member(object):
         }
         return json
     
-    def resolve_param(self, param):
+    def resolve_param(self, param, member=None):
         return param
 
 

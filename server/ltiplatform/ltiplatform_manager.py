@@ -56,6 +56,7 @@ class Tool(object):
                 ags_claim['lineitem'] = '{0}/{1}/lineitems/{2}/lineitem'.format(root_url, course.id, resource_link.lineitem.id)
 
         if fc('custom') in message:
+            print('resolving custom')
             custom = message[fc('custom')]
             resolvers = [course, member]
             if resource_link:
@@ -66,10 +67,12 @@ class Tool(object):
                 for resolver in resolvers:
                     if len(value) == 0 or value[0] != '$':
                         break
-                    value = resolver.resolve_param(value)
+                    value = resolver.resolve_param(value, member=member)
                 return (item[0], value)
             
             message[fc('custom')] = dict(map(resolve, custom.items()))
+        else:
+            print('no custom message')
 
         message['http://imsglobal.org/lti/ags'] = ags_claim    
         message['https://purl.imsglobal.org/lti/claim/namesroleservice'] = memberships_claim 
