@@ -1,3 +1,4 @@
+alembic==0.9.9
 asn1crypto==0.24.0
 attrs==17.3.0
 bleach==2.1.2
@@ -20,11 +21,14 @@ jupyter==1.0.0
 jupyter-client==5.2.0
 jupyter-console==5.2.0
 jupyter-core==4.4.0
+jupyterhub==0.8.0
+Mako==1.0.7
 MarkupSafe==1.0
 mistune==0.8.3
 nbconvert==5.3.1
 nbformat==4.4.0
 notebook==5.2.2
+pamela==0.3.0
 pandocfilters==1.4.2
 parso==0.1.1
 pexpect==4.3.1
@@ -38,11 +42,15 @@ Pygments==2.2.0
 PyJWT==1.5.3
 pytest==3.3.1
 python-dateutil==2.6.1
+python-editor==1.0.3
+python-oauth2==1.1.0
 pyzmq==16.0.3
 qtconsole==4.3.1
 requests==2.18.4
 simplegeneric==0.8.1
 six==1.11.0
+SQLAlchemy==1.2.7
+statsd==3.2.2
 terminado==0.8.1
 testpath==0.3.1
 tornado==4.5.2

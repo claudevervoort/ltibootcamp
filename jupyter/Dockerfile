@@ -1,11 +1,11 @@
-FROM python:latest
+FROM jupyter/minimal-notebook
 
-ADD ./ /app
+ADD ./requirements.txt /tmp/requirements.txt
 
-WORKDIR /app
+RUN pip install -r /tmp/requirements.txt 
 
-RUN pip install -r requirements.txt
+ADD ./notebooks $HOME/ltibootcamp
 
-EXPOSE 8080
-
-CMD ["jupyter", "notebook", "--ip=0.0.0.0", "--allow-root"]
+USER root
+RUN fix-permissions $HOME/ltibootcamp
+USER $NB_UID
