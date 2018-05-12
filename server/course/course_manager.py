@@ -2,6 +2,7 @@ from users.user_manager import Roster
 import uuid
 from time import time
 from dateutil import parser
+from ltiplatform.ltiutil import fc
 
 class Result(object):
 
@@ -117,11 +118,11 @@ class ResourceLink(object):
 
     def addToMessage(self, message):
         message.update({
-            'http://imsglobal.org/lti/resource_link': {
+            fc('resource_link'): {
                 'id': self.id,
                 'title': self.label
             },
-            'http://imsglobal.org/lti/custom': self.params
+            fc('custom'): self.params
         })
         return message
     
@@ -151,7 +152,7 @@ class Course(object):
 
     def addToMessage(self, message):
         message.update({
-            'http://imsglobal.org/lti/context': self.context
+            fc('context'): self.context
         })
         return message
 

@@ -18,7 +18,7 @@ def get_keyset():
     for key in keys:
         public_key = key[1].publickey()
         keyset['keys'].append({
-            'kty': 'rsa',
+            'kty': 'RSA',
             'alg': 'RS256',
             'kid': key[0],
             'use': 'sig',

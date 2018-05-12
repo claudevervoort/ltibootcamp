@@ -1,6 +1,7 @@
 from random import sample, randrange
 from copy import copy
 from time import time
+from ltiplatform.ltiutil import fc
 import uuid
 
 NAMES = [('Tijn', 'Willem'),
@@ -73,7 +74,7 @@ class Member(object):
     def addToMessage(self, msg):
         updated = self.user.addToMessage(msg)
         updated.update({
-            'http://imsglobal.org/lti/roles': [self.role]
+            fc('roles'): [self.role]
         })
         return updated
 
