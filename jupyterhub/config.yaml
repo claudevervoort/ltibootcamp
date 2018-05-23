@@ -1,0 +1,33 @@
+proxy:
+  secretToken: 87a81135eacb6079bb421e557a0b5f0ac1c7d4e1f37541871808e239af2280bd
+singleuser:
+  cpu:
+    guarantee: 0.25
+  memory:
+    guarantee: 0.5G
+  storage:
+    type: none
+  image:
+    name: gcr.io/lti-bootcamp/jupyter
+    tag: latest
+hub:
+  extraConfig: |
+    c.Authenticator.admin_users = {'jhadmin'}
+    from jupyterhub.auth import PAMAuthenticator
+    from tornado import gen
+
+    class FixedPasswordAuthenticator(PAMAuthenticator):
+
+        @gen.coroutine
+        def authenticate(self, handler, data):
+            if 'admin' in data['username']:
+              if data['password'] == 'NoPWDinConf':
+                return data['username']
+            elif data['password'] == 'ltib00t!':
+                return data['username']
+            return None
+
+    #c.JupyterHub.authenticator_class = 'jupyterhub.auth.PAMAuthenticator'
+    c.JupyterHub.authenticator_class = FixedPasswordAuthenticator
+    c.LocalAuthenticator.create_system_users = True
+
