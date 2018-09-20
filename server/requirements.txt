@@ -14,7 +14,7 @@ MarkupSafe==1.0
 mccabe==0.6.1
 pycodestyle==2.3.1
 pycparser==2.18
-pycryptodome==3.6
+pycryptodome==3.6.6
 PyJWT==1.5.3
 pylint==1.8.2
 python-dateutil==2.7.2
