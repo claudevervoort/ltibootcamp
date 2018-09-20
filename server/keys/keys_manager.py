@@ -27,6 +27,8 @@ def get_keyset():
         })
     return keyset
 
+def get_public_key(pem):
+    return RSA.importKey(pem)
 
 def get_client_key():
     key = RSA.generate(2048)

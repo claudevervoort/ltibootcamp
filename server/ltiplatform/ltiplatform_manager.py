@@ -1,6 +1,6 @@
 from time import time
 from copy import copy
-from keys.keys_manager import get_client_key, keys, get_keyset
+from keys.keys_manager import get_client_key, keys, get_keyset, get_public_key
 import jwt
 import uuid
 from course.course_manager import Course 
@@ -9,14 +9,18 @@ from ltiplatform.ltiutil import fc, scope
 
 class Tool(object):
 
-    def __init__(self, platform, client_id):
+    def __init__(self, platform, client_id, public_key_pem=None):
         self.client_id = client_id
         self.deployment_id = "deployment_" + str(client_id)
-        self.key = get_client_key()
+        if public_key_pem:
+            self.publickey = get_public_key(public_key_pem)
+        else:
+            self.key = get_client_key()
+            self.publickey = self.key['key'].publickey()
         self.platform = platform
 
     def getPublicKey(self):
-        return self.key['key'].publickey()
+        return self.publickey
 
     def message(self, messageType, course, member, message, return_url, request_url=None, resource_link=None):
         key = keys[randrange(0, len(keys))]
@@ -99,9 +103,9 @@ class LTIPlatform(object):
     def get_tool(self, tool_id):
         return next(t for t in self.tools if t.client_id == tool_id)
 
-    def new_tool(self):
+    def new_tool(self, public_key_pem=None):
         client_id = str(len(self.tools))
-        tool = Tool(self, client_id)
+        tool = Tool(self, client_id, public_key_pem=public_key_pem)
         self.tools.append(tool)
         return tool
 

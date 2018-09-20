@@ -38,6 +38,17 @@ def newtool():
         'webkeyPem': tool.key['key'].exportKey().decode('utf-8')
     })
 
+@app.route("/newtool", methods=['POST'])
+def newtool_with_public_key():
+    tool = platform.new_tool(public_key_pem=request.form['public_key_pem'])
+    platform.url = request.url_root
+    course_by_tool[tool.client_id] = platform.new_course()
+    return jsonify({
+        'accesstoken_endpoint': request.url_root.rstrip('/') + '/auth/token',
+        'keyset_url': request.url_root.rstrip('/') + '/.well-known/jwks.json',
+        'client_id': tool.client_id
+    })
+
 @app.route("/tool/<tool_id>/deeplinkingmessage")
 def content_item_launch(tool_id):
     course = course_by_tool[tool_id]
