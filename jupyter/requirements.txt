@@ -5,7 +5,7 @@ bleach==2.1.2
 certifi==2017.11.5
 cffi==1.11.4
 chardet==3.0.4
-cryptography==2.1.4
+cryptography==2.3
 decorator==4.1.2
 entrypoints==0.2.3
 html5lib==1.0.1
@@ -27,7 +27,7 @@ MarkupSafe==1.0
 mistune==0.8.3
 nbconvert==5.3.1
 nbformat==4.4.0
-notebook==5.2.2
+notebook==5.4.1
 pamela==0.3.0
 pandocfilters==1.4.2
 parso==0.1.1

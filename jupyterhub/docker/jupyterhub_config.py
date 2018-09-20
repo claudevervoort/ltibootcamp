@@ -76,8 +76,13 @@
 #    and `data` is the POST form data from the login page.
 
 from jupyterhub.auth import PAMAuthenticator
+from traitlets import default
 
 class FixedPasswordAuthenticator(PAMAuthenticator):
+
+    @default('custom_html')
+    def _get_custom_html(self):
+        return '222'
 
     def authenticate(self, handler, data):
         if 'admin' in data['username']:
