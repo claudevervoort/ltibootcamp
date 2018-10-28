@@ -1,0 +1,1 @@
+sudo bash -c 'source /home/claude/py3envs/jupyter/bin/activate && jupyterhub --config localprocess_jupyterhub_config.py'

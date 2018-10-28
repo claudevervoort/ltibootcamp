@@ -8,6 +8,15 @@
 		},
 		{
 			"path": "/home/claude/ims"
+		},
+		{
+			"path": "/home/claude/repos/jupyterhub"
+		},
+		{
+			"path": "/home/claude/py3envs/proxytoports/lib/python3.5/site-packages/twisted"
+		},
+		{
+			"path": "/home/claude/py3envs/jupyter"
 		}
 	],
 	"settings": {

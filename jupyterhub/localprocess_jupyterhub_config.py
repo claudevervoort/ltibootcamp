@@ -93,7 +93,7 @@ class FixedPasswordAuthenticator(PAMAuthenticator):
         if 'admin' in data['username']:
             return super(PAMAuthenticator, self).authenticate(handler, data)
         if data['password'] == 'ltib00t!':
-            return data['username']
+            return 'ltibc-{}'.format(data['username'])
         return None
 
 #c.JupyterHub.authenticator_class = 'jupyterhub.auth.PAMAuthenticator'
@@ -638,8 +638,10 @@ def copy_notebook(spawner):
         print('copy dir %s' % (volume_path))
         with os.scandir(volume_path) as it:
             for entry in it:
+                if entry.is_dir():
+                    shutil.chown(entry.path, user=username, group=username)
                 if entry.is_file():
-                    shutil.chown(entry.path, user=username)
+                    shutil.chown(entry.path, user=username, group=username)
 
         # now do whatever you think your user needs
         # ...
