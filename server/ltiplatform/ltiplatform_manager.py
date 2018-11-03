@@ -9,9 +9,10 @@ from ltiplatform.ltiutil import fc, scope
 
 class Tool(object):
 
-    def __init__(self, platform, client_id, public_key_pem=None):
+    def __init__(self, platform, client_id, public_key_pem=None, redirect_uri=None):
         self.client_id = client_id
         self.deployment_id = "deployment_" + str(client_id)
+        self.redirect_uri = redirect_uri
         if public_key_pem:
             self.publickey = get_public_key(public_key_pem)
         else:
@@ -22,11 +23,13 @@ class Tool(object):
     def getPublicKey(self):
         return self.publickey
 
-    def message(self, messageType, course, member, message, return_url, request_url=None, resource_link=None):
+    def message(self, messageType, course, member, message, return_url, request_url=None, resource_link=None, nonce=None):
         key = keys[randrange(0, len(keys))]
         privatekey = key[1].exportKey()
         now = int(time())
         root_url = request_url.rstrip('/') if request_url else self.platform.url
+        if nonce:
+            message['nonce'] = nonce
         message.update({
             'iat': now,
             'exp': now + 60,

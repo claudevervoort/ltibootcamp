@@ -49,8 +49,33 @@ def newtool_with_public_key():
         'client_id': tool.client_id
     })
 
+
+@app.route('/auth')
+def oidc_authorization():
+    login_hint = request.args.get("login_hint")
+    message_hint = request.args.get("lti_message_hint")
+    client_id = request.args.get("client_id")
+    redirect_uri = request.args.get("redirect_uri")
+    nonce = request.args.get("nonce")
+
+    tool = platform.get_tool(client_id)
+    if not (tool and tool.redirect_uri == redirect_uri):
+        abort(403)
+    if message_hint == 'deeplink':
+        id_token = content_item_launch(client_id, nonce=nonce)
+    if login_hint = 'student':
+        (context_id, resource_link_id) = message_hint.split('rlid')
+        id_token = student_launch(client_id, 
+                                  context_id, 
+                                  nonce=nonce, 
+                                  resource_link_id=resource_link_id)
+    else:
+        abort(400)
+    return render_template('postauthresponse.html', redirect_uri, state, id_token)
+
+
 @app.route("/tool/<tool_id>/deeplinkingmessage")
-def content_item_launch(tool_id):
+def content_item_launch(tool_id, nonce=None, redirect_uri=None):
     course = course_by_tool[tool_id]
     instructor = course.roster.getInstructor()
     message = {}
@@ -62,7 +87,7 @@ def content_item_launch(tool_id):
         "data": "op=321&v=44"
     }
     return_url = "/tool/{0}/dlr".format(course.id)
-    return platform.get_tool(tool_id).message('LTIDeepLinkingRequest', course, instructor, message, return_url, request_url=request.url_root)
+    return platform.get_tool(tool_id).message('LTIDeepLinkingRequest', course, instructor, message, return_url, nonce=nonce,mrequest_url=request.url_root)
 
 @app.route("/tool/<context_id>/dlr", methods=['POST'])
 def content_item_return(context_id):
@@ -80,9 +105,9 @@ def content_item_return(context_id):
 
 
 @app.route("/tool/<tool_id>/context/<context_id>/studentlaunch")
-def student_launch(tool_id, context_id):
+def student_launch(tool_id, context_id, nonce=None,  resource_link_id=None):
     course = platform.get_course(context_id)
-    rlid = request.args.get('rlid', '' )
+    rlid = resource_link_id or request.args.get('rlid', '' )
     rlid = rlid if rlid else course.getOneGradableLinkId()
     resource_link = course.getResourceLink(rlid)
     return platform.get_tool(tool_id).message('LTIResourceLinkLaunch', 
@@ -90,6 +115,7 @@ def student_launch(tool_id, context_id):
                                             course.roster.getOneStudent(), 
                                             {}, 
                                             request.url_root,
+                                            nonce=nonce,
                                             request_url=request.url_root,
                                             resource_link=resource_link)
 
