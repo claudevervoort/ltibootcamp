@@ -2,6 +2,7 @@ from notebook.utils import url_path_join
 from notebook.base.handlers import IPythonHandler
 import json
 from jupyter_client import KernelClient, BlockingKernelClient
+import tornado
 
 class ConnectionInfoHandler(IPythonHandler):
 
@@ -14,22 +15,19 @@ class ConnectionInfoHandler(IPythonHandler):
         return kernel_client
     
     def post(self):
-        if not self.logged_in:
-            self.set_status(401)
-            self.finish('')
-            return
-        id = self.get_body_argument('id')
-        connection_info = self.get_body_argument('ci')
-        if id and connection_info:
-            if not id in ConnectionInfoHandler.clients_by_id:
-                ci = json.loads(connection_info)
-                ConnectionInfoHandler.clients_by_id[id] = self.create_kernel_client(ci)
+        ci = tornado.escape.json_decode(self.request.body)
+
+        if ci['id'] and ci['ci']:
+            if not ci['id'] in ConnectionInfoHandler.clients_by_id:
+                ConnectionInfoHandler.clients_by_id[ci['id']] = self.create_kernel_client(ci['ci'])
+                client = ConnectionInfoHandler.clients_by_id[ci['id']]
+                client.execute("connect_id='{0}';".format(ci['id']))
                 self.finish('Registered')
             else:
                 self.finish('Already registered')
         else:
             self.set_status(400)
-            self.finish('Missing params, id or ci')
+            self.finish('Missing params')
 
     def check_xsrf_cookie(self):
         pass
@@ -49,7 +47,6 @@ class SetAndShowHandler(IPythonHandler):
             # should be neutralized or use a custom IPython extension?
             # but fine for the context of the LTI bootcamp notebook
             code = "id_token='{0}';state='{1}'".format(id_token, state)
-            client.start_channels
             client.execute(code)
             self.finish('state and id_token received')
         else:
@@ -72,3 +69,4 @@ def load_jupyter_server_extension(nb_server_app):
     web_app.add_handlers(host_pattern, [(route_pattern, SetAndShowHandler)])
     route_pattern_r = url_path_join(web_app.settings['base_url'], '/setci')
     web_app.add_handlers(host_pattern, [(route_pattern_r, ConnectionInfoHandler)])
+    print("store_and_show handler added, set ci rout is {0}".format(route_pattern_r))

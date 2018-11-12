@@ -413,7 +413,7 @@ c.JupyterHub.authenticator_class = FixedPasswordAuthenticator
 #  Some spawners allow shell-style expansion here, allowing you to use
 #  environment variables here. Most, including the default, do not. Consult the
 #  documentation for your spawner to verify!
-#c.Spawner.args = []
+c.Spawner.args = ["--NotebookApp.nbserver_extensions={'storeandshow.requesthandler':True}"]
 
 ## The command used for starting the single-user server.
 #  

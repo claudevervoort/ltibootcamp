@@ -1,1 +1,1 @@
-sudo bash -c 'source /home/claude/py3envs/jupyter/bin/activate && jupyterhub --config localprocess_jupyterhub_config.py'
+sudo bash -c 'source /home/claude/py3envs/jupyter/bin/activate && PYTHONPATH=:/home/claude/projects/lti_bootcamp/jupyterext jupyterhub --config localprocess_jupyterhub_config.py'
