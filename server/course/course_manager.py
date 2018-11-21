@@ -2,7 +2,9 @@ from users.user_manager import Roster
 import uuid
 from time import time
 from dateutil import parser
+from ltiplatform import Tool
 from ltiplatform.ltiutil import fc
+import typing
 
 class Result(object):
 
@@ -138,7 +140,7 @@ class ResourceLink(object):
 
 class Course(object):
 
-    def __init__(self, name):
+    def __init__(self, name: str):
         self.id = str(uuid.uuid1())
         self.context = {
             'id': self.id,
@@ -150,13 +152,13 @@ class Course(object):
         self.lineitems = []
         self.links = []
 
-    def addToMessage(self, message):
+    def addToMessage(self, message: dict):
         message.update({
             fc('context'): self.context
         })
         return message
 
-    def addResourceLinks(self, tool, content_items):
+    def addResourceLinks(self, tool: Tool, content_items):
         for item in content_items:
             label = item.get('title', '')
             description = item.get('text', '')
