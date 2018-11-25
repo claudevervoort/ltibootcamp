@@ -2,13 +2,20 @@ from users.user_manager import Roster
 import uuid
 from time import time
 from dateutil import parser
-from ltiplatform import Tool
+from ltiplatform.ltiplatform_manager import Tool
 from ltiplatform.ltiutil import fc
 import typing
 
 class Result(object):
 
-    def __init__(self, lineitem, user_id, score, max, grading_progress, comment, timestamp):
+    def __init__(self, 
+                lineitem, 
+                user_id: str, 
+                score: float, 
+                max: float, 
+                grading_progress: str, 
+                comment: str, 
+                timestamp: int):
         self.lineitem = lineitem
         self.user_id = user_id
         self.score = score
@@ -17,7 +24,7 @@ class Result(object):
         self.comment = comment
 
     @classmethod
-    def from_score(cls, lineitem, score):
+    def from_score(cls, lineitem, score: dict):
         return cls(lineitem, 
                       score['userId'], 
                       score.get('scoreGiven'), 
@@ -53,7 +60,14 @@ class Result(object):
 
 class LineItem(object):
 
-    def __init__(self, tool, course, id, maximum, label, resource_id, tag, resource_link = None):
+    def __init__(self, tool: Tool, 
+                       course, 
+                       id: str, 
+                       maximum: float, 
+                       label: str, 
+                       resource_id: str, 
+                       tag: str, 
+                       resource_link :str = None):
         self.id = id
         self.course = course
         self.tool = tool
@@ -64,27 +78,27 @@ class LineItem(object):
         self.resource_link = resource_link
         self.results = {}
 
-    def save_score(self, score):
+    def save_score(self, score: dict) -> None:
         #check prior value timestamp here
         self.results[score['userId']]=Result.from_score(self, score)
 
     @property
-    def relative_url(self):
+    def relative_url(self) -> str:
         return "/{0}/lineitems/{1}/lineitem".format(self.course.id, self.id)
 
     @classmethod
-    def from_json(cls, tool, course, li, id=1, label='', resource_link=None):
+    def from_json(cls, tool: Tool, course, li, id:int=1, label:str='', resource_link:str=None):
         label = li.get('label', label)
         score_maximum = li['scoreMaximum']
         resource_id = li.get('resourceId', '')
         tag = li.get('tag', '')
         return cls(tool, course, id, score_maximum, label, resource_id, tag, resource_link=resource_link)
 
-    def getScaledResult(self, user_id):
+    def getScaledResult(self, user_id: int) -> float:
         s = self.results.get(user_id)
         return s.scaled_score if s else None
 
-    def get_json(self, base_url):
+    def get_json(self, base_url: str) -> dict:
         l = {
             'id': '{0}{1}'.format(base_url, self.relative_url),
             'scoreMaximum': self.max
@@ -108,7 +122,7 @@ class LineItem(object):
 
 class ResourceLink(object):
 
-    def __init__(self, tool, label, description, url, params, lineitem=None, duedate=None):
+    def __init__(self, tool: Tool, label: str, description: str, url, params, lineitem=None, duedate=None):
         self.tool = tool
         self.label = label
         self.id = str(uuid.uuid1())
@@ -118,7 +132,7 @@ class ResourceLink(object):
         self.params = params
         self.due_date = duedate
 
-    def addToMessage(self, message):
+    def addToMessage(self, message: dict):
         message.update({
             fc('resource_link'): {
                 'id': self.id,
@@ -158,7 +172,7 @@ class Course(object):
         })
         return message
 
-    def addResourceLinks(self, tool: Tool, content_items):
+    def addResourceLinks(self, tool: Tool, content_items: list):
         for item in content_items:
             label = item.get('title', '')
             description = item.get('text', '')
