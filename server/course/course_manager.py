@@ -2,7 +2,7 @@ from users.user_manager import Roster
 import uuid
 from time import time
 from dateutil import parser
-from ltiplatform.ltiplatform_manager import Tool
+from ltiplatform.tool import Tool
 from ltiplatform.ltiutil import fc
 import typing
 
@@ -87,7 +87,7 @@ class LineItem(object):
         return "/{0}/lineitems/{1}/lineitem".format(self.course.id, self.id)
 
     @classmethod
-    def from_json(cls, tool: Tool, course, li, id:int=1, label:str='', resource_link:str=None):
+    def from_json(cls, tool, course, li, id:int=1, label:str='', resource_link:str=None):
         label = li.get('label', label)
         score_maximum = li['scoreMaximum']
         resource_id = li.get('resourceId', '')
@@ -122,7 +122,7 @@ class LineItem(object):
 
 class ResourceLink(object):
 
-    def __init__(self, tool: Tool, label: str, description: str, url, params, lineitem=None, duedate=None):
+    def __init__(self, tool, label: str, description: str, url, params, lineitem=None, duedate=None):
         self.tool = tool
         self.label = label
         self.id = str(uuid.uuid1())
@@ -172,7 +172,7 @@ class Course(object):
         })
         return message
 
-    def addResourceLinks(self, tool: Tool, content_items: list):
+    def addResourceLinks(self, tool, content_items: list):
         for item in content_items:
             label = item.get('title', '')
             description = item.get('text', '')

@@ -40,13 +40,15 @@ def newtool():
 
 @app.route("/newtool", methods=['POST'])
 def newtool_with_public_key():
-    tool = platform.new_tool(public_key_pem=request.form['public_key_pem'])
+    tool = platform.new_tool(public_key_pem=request.form['public_key_pem'],
+                             redirect_uris=request.form['redirect_uris'].split(','))
     platform.url = request.url_root
     course_by_tool[tool.client_id] = platform.new_course()
     return jsonify({
         'accesstoken_endpoint': request.url_root.rstrip('/') + '/auth/token',
         'keyset_url': request.url_root.rstrip('/') + '/.well-known/jwks.json',
-        'client_id': tool.client_id
+        'client_id': tool.client_id,
+        'oidc_auth_endpoint': request.url_root.rstrip('/') + '/auth',
     })
 
 
@@ -59,11 +61,11 @@ def oidc_authorization():
     nonce = request.args.get("nonce")
 
     tool = platform.get_tool(client_id)
-    if not (tool and tool.redirect_uri == redirect_uri):
+    if not (tool and redirect_uri in tool.redirect_uris):
         abort(403)
     if message_hint == 'deeplink':
         id_token = content_item_launch(client_id, nonce=nonce)
-    if login_hint = 'student':
+    if login_hint == 'student':
         (context_id, resource_link_id) = message_hint.split('rlid')
         id_token = student_launch(client_id, 
                                   context_id, 
