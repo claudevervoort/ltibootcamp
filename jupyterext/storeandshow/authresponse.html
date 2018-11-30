@@ -1,0 +1,21 @@
+<html>
+    <head>
+        <script>
+        function clipboard(id) {
+          var copyText = document.getElementById(id);
+          copyText.select();
+          document.execCommand("copy");
+        }
+        </script>
+    </head>
+    <body>
+        <h3>Successful authentication response</h3>
+        <p><code>state</code> and <code>id_token</code> variables should now be available in your notebook.
+            If not you can copy them from here and set them manually.
+        </p>
+        <h4>state <button onclick="clipboard('state')">copy</button></h4>
+        <textarea id='state'>{{ escape(state) }}</textarea>
+        <h4>id_token <button onclick="clipboard('id_token')">copy</button></h4>
+        <textarea id='id_token'>{{ escape(id_token) }}</textarea>
+    </body>
+</html>

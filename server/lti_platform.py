@@ -52,7 +52,7 @@ def newtool_with_public_key():
     })
 
 
-@app.route('/auth')
+@app.route('/auth', methods=['POST'])
 def oidc_authorization():
     login_hint = request.args.get("login_hint")
     message_hint = request.args.get("lti_message_hint")

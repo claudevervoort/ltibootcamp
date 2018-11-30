@@ -1,8 +1,11 @@
 from notebook.utils import url_path_join
 from notebook.base.handlers import IPythonHandler
 import json
+import os
 from jupyter_client import KernelClient, BlockingKernelClient
+from tornado import template
 import tornado
+
 
 class ConnectionInfoHandler(IPythonHandler):
 
@@ -48,13 +51,20 @@ class SetAndShowHandler(IPythonHandler):
             # but fine for the context of the LTI bootcamp notebook
             code = "id_token='{0}';state='{1}'".format(id_token, state)
             client.execute(code)
-            self.finish('state and id_token received')
+            dir_path = os.path.dirname(os.path.realpath(__file__))
+            loader = template.Loader(dir_path)
+            self.finish(loader.load("authresponse.html").generate(state=state, id_token=ci_id))
         else:
             self.set_status(400)
             self.finish('Missing parameters or not configured client')
 
     def check_xsrf_cookie(self):
         pass
+
+    def get(self):
+        dir_path = os.path.dirname(os.path.realpath(__file__))
+        loader = template.Loader(dir_path)
+        self.finish(loader.load("authresponse.html").generate(state="XXX", id_token='3289y9d9u293e982748h2d928.3278923u'))
 
 def load_jupyter_server_extension(nb_server_app):
     """
