@@ -54,18 +54,19 @@ def newtool_with_public_key():
 
 @app.route('/auth', methods=['POST'])
 def oidc_authorization():
-    login_hint = request.args.get("login_hint")
-    message_hint = request.args.get("lti_message_hint")
-    client_id = request.args.get("client_id")
-    redirect_uri = request.args.get("redirect_uri")
-    nonce = request.args.get("nonce")
+    login_hint = request.form["login_hint"]
+    message_hint = request.form["lti_message_hint"]
+    client_id = request.form["client_id"]
+    redirect_uri = request.form["redirect_uri"]
+    nonce = request.form["nonce"]
+    state = request.form["state"]
 
     tool = platform.get_tool(client_id)
     if not (tool and redirect_uri in tool.redirect_uris):
         abort(403)
     if message_hint == 'deeplink':
         id_token = content_item_launch(client_id, nonce=nonce)
-    if login_hint == 'student':
+    elif login_hint == 'student':
         (context_id, resource_link_id) = message_hint.split('rlid')
         id_token = student_launch(client_id, 
                                   context_id, 
@@ -73,7 +74,7 @@ def oidc_authorization():
                                   resource_link_id=resource_link_id)
     else:
         abort(400)
-    return render_template('postauthresponse.html', redirect_uri, state, id_token)
+    return render_template('postauthresponse.html', redirect_uri=redirect_uri, state=state, id_token=id_token.decode('utf-8'))
 
 
 @app.route("/tool/<tool_id>/deeplinkingmessage")
@@ -89,7 +90,7 @@ def content_item_launch(tool_id, nonce=None, redirect_uri=None):
         "data": "op=321&v=44"
     }
     return_url = "/tool/{0}/dlr".format(course.id)
-    return platform.get_tool(tool_id).message('LTIDeepLinkingRequest', course, instructor, message, return_url, nonce=nonce,mrequest_url=request.url_root)
+    return platform.get_tool(tool_id).message('LTIDeepLinkingRequest', course, instructor, message, return_url, nonce=nonce, request_url=request.url_root)
 
 @app.route("/tool/<context_id>/dlr", methods=['POST'])
 def content_item_return(context_id):

@@ -53,7 +53,7 @@ class SetAndShowHandler(IPythonHandler):
             client.execute(code)
             dir_path = os.path.dirname(os.path.realpath(__file__))
             loader = template.Loader(dir_path)
-            self.finish(loader.load("authresponse.html").generate(state=state, id_token=ci_id))
+            self.finish(loader.load("authresponse.html").generate(state=state, id_token=id_token))
         else:
             self.set_status(400)
             self.finish('Missing parameters or not configured client')
