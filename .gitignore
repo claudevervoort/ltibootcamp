@@ -1,6 +1,15 @@
+*.code-workspace
 __pycache__/
 *.py[cod]
 .vscode/
 .ipynb_checkpoints/
 .py3envs/
+*.code-workspace
+/jupyterhub/jhnotebooks/
+/jupyter/sqllite
+notes.md
 notes.txt
+jupyter/jupyterhub.sqlite
+jupyter/jupyterhub_cookie_secret
+jupyterhub/jupyterhub.sqlite
+jupyterhub/jupyterhub_cookie_secret

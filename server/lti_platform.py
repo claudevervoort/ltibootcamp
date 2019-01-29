@@ -1,5 +1,6 @@
 from flask import Flask, jsonify, request, render_template, redirect, send_from_directory, abort
 from ltiplatform.ltiplatform_manager import LTIPlatform
+from ltiplatform.ltiutil import fc, fdlc
 from keys import keys_manager
 from random import randrange
 from accesstoken.token_manager import check_token, new_token
@@ -37,23 +38,58 @@ def newtool():
         'webkeyPem': tool.key['key'].exportKey().decode('utf-8')
     })
 
-@app.route("/tool/<tool_id>/cisr")
-def content_item_launch(tool_id):
+@app.route("/newtool", methods=['POST'])
+def newtool_with_public_key():
+    tool = platform.new_tool(public_key_pem=request.form['public_key_pem'])
+    platform.url = request.url_root
+    course_by_tool[tool.client_id] = platform.new_course()
+    return jsonify({
+        'accesstoken_endpoint': request.url_root.rstrip('/') + '/auth/token',
+        'keyset_url': request.url_root.rstrip('/') + '/.well-known/jwks.json',
+        'client_id': tool.client_id
+    })
+
+
+@app.route('/auth')
+def oidc_authorization():
+    login_hint = request.args.get("login_hint")
+    message_hint = request.args.get("lti_message_hint")
+    client_id = request.args.get("client_id")
+    redirect_uri = request.args.get("redirect_uri")
+    nonce = request.args.get("nonce")
+
+    tool = platform.get_tool(client_id)
+    if not (tool and tool.redirect_uri == redirect_uri):
+        abort(403)
+    if message_hint == 'deeplink':
+        id_token = content_item_launch(client_id, nonce=nonce)
+    if login_hint = 'student':
+        (context_id, resource_link_id) = message_hint.split('rlid')
+        id_token = student_launch(client_id, 
+                                  context_id, 
+                                  nonce=nonce, 
+                                  resource_link_id=resource_link_id)
+    else:
+        abort(400)
+    return render_template('postauthresponse.html', redirect_uri, state, id_token)
+
+
+@app.route("/tool/<tool_id>/deeplinkingmessage")
+def content_item_launch(tool_id, nonce=None, redirect_uri=None):
     course = course_by_tool[tool_id]
     instructor = course.roster.getInstructor()
-    message = {
-        "http://imsglobal.org/lti/deep_linking_request": {
-            "accept_media_types": ["application/vnd.ims.lti.v1.ltilink"],
-            "accept_presentation_document_targets": [ "iframe", "window"],
-            "accept_multiple": True,
-            "auto_create": True,
-            "data": "op=321&v=44"
-        }
+    message = {}
+    message[fdlc('deep_linking_settings')] = {
+        "accept_types": ["ltiLink"],
+        "accept_presentation_document_targets": ["iframe", "window"],
+        "accept_multiple": True,
+        "auto_create": True,
+        "data": "op=321&v=44"
     }
-    return_url = "/tool/{0}/cir".format(course.id)
-    return platform.get_tool(tool_id).token('LTIDeepLinkingRequest', course, instructor, message, return_url, request_url=request.url_root)
+    return_url = "/tool/{0}/dlr".format(course.id)
+    return platform.get_tool(tool_id).message('LTIDeepLinkingRequest', course, instructor, message, return_url, nonce=nonce,mrequest_url=request.url_root)
 
-@app.route("/tool/<context_id>/cir", methods=['POST'])
+@app.route("/tool/<context_id>/dlr", methods=['POST'])
 def content_item_return(context_id):
     encoded_jwt = request.form['jws_token']
     unverified = jwt.decode(encoded_jwt, verify=False)
@@ -62,23 +98,24 @@ def content_item_return(context_id):
        key=tool.getPublicKey().exportKey(), 
        algorithms=['RS256'],
        audience=request.url_root.rstrip('/'))
-    if ('http://imsglobal.org/lti/content_items' in deep_linking_res):
-        content_items = deep_linking_res['http://imsglobal.org/lti/content_items']
+    if (fdlc('content_items') in deep_linking_res):
+        content_items = deep_linking_res[fdlc('content_items')]
         platform.get_course(context_id).addResourceLinks(tool, content_items)
     return redirect('/course/'+context_id, code=302)
 
 
 @app.route("/tool/<tool_id>/context/<context_id>/studentlaunch")
-def student_launch(tool_id, context_id):
+def student_launch(tool_id, context_id, nonce=None,  resource_link_id=None):
     course = platform.get_course(context_id)
-    rlid = request.args.get('rlid', '' )
+    rlid = resource_link_id or request.args.get('rlid', '' )
     rlid = rlid if rlid else course.getOneGradableLinkId()
     resource_link = course.getResourceLink(rlid)
-    return platform.get_tool(tool_id).token('LTIResourceLinkLaunch', 
+    return platform.get_tool(tool_id).message('LTIResourceLinkLaunch', 
                                             course, 
                                             course.roster.getOneStudent(), 
                                             {}, 
                                             request.url_root,
+                                            nonce=nonce,
                                             request_url=request.url_root,
                                             resource_link=resource_link)
 
@@ -123,7 +160,7 @@ def get_and_check_lineitem(context_id, item_id, client_id):
     return lineitem
 
 @app.route("/<context_id>/lineitems/<item_id>/lineitem/scores", methods=['POST'])
-@check_token('https://imsglobal.org/lti/ags/score')
+@check_token('https://purl.imsglobal.org/spec/lti-ags/scope/score')
 def save_score(context_id=None, item_id=None, client_id=None):
     # we are not checking media type because the URL is enough of a discriminator
     score = request.get_json()
@@ -132,7 +169,7 @@ def save_score(context_id=None, item_id=None, client_id=None):
     return ''
 
 @app.route("/<context_id>/lineitems/<item_id>/lineitem/results", methods=['GET'])
-@check_token('https://imsglobal.org/lti/ags/results.readonly')
+@check_token('https://purl.imsglobal.org/spec/lti-ags/scope/result.readonly')
 def get_results(context_id=None, item_id=None, client_id=None):
     # we are not checking media type because the URL is enough of a discriminator
     lineitem = get_and_check_lineitem(context_id,item_id, client_id)
@@ -140,14 +177,14 @@ def get_results(context_id=None, item_id=None, client_id=None):
     return jsonify(results)
 
 @app.route("/<context_id>/lineitems/<item_id>/lineitem", methods=['GET'])
-@check_token('https://imsglobal.org/lti/ags/lineitem', 'https://imsglobal.org/lti/ags/lineitem.readonly')
+@check_token('https://purl.imsglobal.org/spec/lti-ags/scope/lineitem', 'https://purl.imsglobal.org/spec/lti-ags/scope/lineitem.readonly')
 def get_lineitem(context_id=None, item_id=None, client_id=None):
     # we are not checking media type because the URL is enough of a discriminator
     lineitem = get_and_check_lineitem(context_id,item_id, client_id)
     return jsonify(lineitem.get_json(url_root()))
 
 @app.route("/<context_id>/lineitems/<item_id>/lineitem", methods=['PUT'])
-@check_token('https://imsglobal.org/lti/ags/lineitem')
+@check_token('https://purl.imsglobal.org/spec/lti-ags/scope/lineitem')
 def update_lineitem(context_id=None, item_id=None, client_id=None):
     # we are not checking media type because the URL is enough of a discriminator
     lineitem = get_and_check_lineitem(context_id,item_id, client_id)
@@ -155,7 +192,7 @@ def update_lineitem(context_id=None, item_id=None, client_id=None):
     return jsonify(lineitem.get_json(url_root()))
 
 @app.route("/<context_id>/lineitems/<item_id>/lineitem", methods=['DELETE'])
-@check_token('https://imsglobal.org/lti/ags/lineitem')
+@check_token('https://purl.imsglobal.org/spec/lti-ags/scope/lineitem')
 def delete_lineitem(context_id=None, item_id=None, client_id=None):
     # we are not checking media type because the URL is enough of a discriminator
     lineitem = get_and_check_lineitem(context_id,item_id, client_id)
@@ -163,7 +200,7 @@ def delete_lineitem(context_id=None, item_id=None, client_id=None):
     return ''
 
 @app.route("/<context_id>/lineitems", methods=['GET'])
-@check_token('https://imsglobal.org/lti/ags/lineitem', 'https://imsglobal.org/lti/ags/lineitem.readonly')
+@check_token('https://purl.imsglobal.org/spec/lti-ags/scope/lineitem', 'https://purl.imsglobal.org/spec/lti-ags/scope/lineitem.readonly')
 def get_lineitems(context_id=None, client_id=None):
     # we are not checking media type because the URL is enough of a discriminator
     tool = platform.get_tool(client_id)
@@ -172,10 +209,27 @@ def get_lineitems(context_id=None, client_id=None):
     return jsonify(results)
 
 @app.route("/<context_id>/lineitems", methods=['POST'])
-@check_token('https://imsglobal.org/lti/ags/lineitem')
+@check_token('https://purl.imsglobal.org/spec/lti-ags/scope/lineitem')
 def add_lineitem(context_id=None, client_id=None):
     # we are not checking media type because the URL is enough of a discriminator
     tool = platform.get_tool(client_id)
     course = platform.get_course(context_id)
     lineitem = course.add_lineitem(tool, request.get_json())
     return jsonify(lineitem.get_json(url_root()))
+
+@app.route("/<context_id>/memberships", methods=['GET'])
+@check_token('https://purl.imsglobal.org/spec/lti-nrps/scope/contextmembership.readonly')
+def get_memberships(context_id=None, client_id=None):
+    # we are not checking media type because the URL is enough of a discriminator
+    tool = platform.get_tool(client_id)
+    course = platform.get_course(context_id)
+    roster = course.get_roster()
+    if ('since' in request.args):
+        roster = roster.since(int(request.args['since']))
+    if ('role' in request.args):
+        roster = roster.role(request.args['role'])
+    if ('limit' in request.args):
+        start = int(request.args.get('from', '0'))
+        limit = int(request.args['limit'])
+        roster = roster.limit(start, limit)
+    return jsonify(roster.to_json(url_root()))

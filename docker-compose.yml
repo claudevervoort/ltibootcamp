@@ -1,0 +1,12 @@
+version: '3'
+services:
+  tool:
+    build: ./jupyter
+    ports:
+     - "8888:8888"
+  platform:
+    build: ./server
+    environment:
+     - FLASK_APP=lti_platform.py
+    ports:
+     - "5000:5000"

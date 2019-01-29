@@ -1,6 +1,8 @@
 from users.user_manager import Roster
 import uuid
 from time import time
+from dateutil import parser
+from ltiplatform.ltiutil import fc
 
 class Result(object):
 
@@ -104,7 +106,7 @@ class LineItem(object):
 
 class ResourceLink(object):
 
-    def __init__(self, tool, label, description, url, params, lineitem=None):
+    def __init__(self, tool, label, description, url, params, lineitem=None, duedate=None):
         self.tool = tool
         self.label = label
         self.id = str(uuid.uuid1())
@@ -112,16 +114,26 @@ class ResourceLink(object):
         self.url = url
         self.lineitem = lineitem
         self.params = params
+        self.due_date = duedate
 
     def addToMessage(self, message):
         message.update({
-            'http://imsglobal.org/lti/resource_link': {
+            fc('resource_link'): {
                 'id': self.id,
                 'title': self.label
             },
-            'http://imsglobal.org/lti/custom': self.params
+            fc('custom'): self.params
         })
         return message
+    
+    def resolve_param(self, param, member=None):
+        print('resolving {0}'.format(param))
+        if param == '$ResourceLink.submission.endDateTime':
+            if self.due_date:
+                return self.due_date.isoformat()
+            else:
+                return ''
+        return param
 
 
 class Course(object):
@@ -134,13 +146,13 @@ class Course(object):
             'title': name,
             'type': ['CourseSection']
         }
-        self.roster = Roster()
+        self.roster = Roster.get_random_roster(self)
         self.lineitems = []
         self.links = []
 
     def addToMessage(self, message):
         message.update({
-            'http://imsglobal.org/lti/context': self.context
+            fc('context'): self.context
         })
         return message
 
@@ -148,9 +160,12 @@ class Course(object):
         for item in content_items:
             label = item.get('title', '')
             description = item.get('text', '')
+            duedate = None
+            if 'submission' in item and 'endDateTime' in item['submission']:
+                duedate = parser.parse(item['submission']['endDateTime'])
             url = item.get('url', '')
             custom = item.get('custom', {})
-            rl = ResourceLink(tool, label, description, url, custom)
+            rl = ResourceLink(tool, label, description, url, custom, duedate=duedate)
             if 'lineItem' in item:
                 rl.lineitem = LineItem.from_json(tool, self, item['lineItem'], id=(len(self.lineitems) + 1), resource_link=rl)
                 self.lineitems.append(rl.lineitem)
@@ -158,7 +173,6 @@ class Course(object):
 
     def getOneGradableLinkId(self):
         gradables = list(filter(lambda r: True if r.lineitem else False, self.links))
-        print(self.links)
         if (gradables):
             return gradables[0].id
         raise Exception("no gradable resource link")
@@ -168,7 +182,14 @@ class Course(object):
         if (match):
             return match[0]
         raise KeyError('No such link ' + rlid)
-    
+
+
+    def resolve_param(self, param, member=None):
+        return param
+
+    def get_roster(self):
+        return self.roster
+
     def get_lineitem(self, lineitem_id):
         match = list(filter(lambda r: str(r.id) == str(lineitem_id), self.lineitems))
         if (match):
