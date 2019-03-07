@@ -14,7 +14,7 @@ class ConnectionInfoHandler(IPythonHandler):
     def create_kernel_client(self, ci):
         kernel_client = BlockingKernelClient()
         kernel_client.load_connection_info(ci)
-        kernel_client.start_channels()
+        kernel_client.start_channels(shell=True, iopub=False, stdin=False, hb=False)
         return kernel_client
     
     def post(self):
@@ -25,9 +25,9 @@ class ConnectionInfoHandler(IPythonHandler):
                 ConnectionInfoHandler.clients_by_id[ci['id']] = self.create_kernel_client(ci['ci'])
                 client = ConnectionInfoHandler.clients_by_id[ci['id']]
                 client.execute("connect_id='{0}';".format(ci['id']))
-                self.finish('Registered')
+                self.finish('Registered {0}'.format(ci['id']))
             else:
-                self.finish('Already registered')
+                self.finish('Already registered {0}'.format(ci['id']))
         else:
             self.set_status(400)
             self.finish('Missing params')
@@ -44,27 +44,19 @@ class SetAndShowHandler(IPythonHandler):
             return
         id_token = self.get_body_argument('id_token')
         state = self.get_body_argument('state')
-        ci_id = self.get_query_argument('ciid')
-        if ci_id and state and id_token and ci_id in ConnectionInfoHandler.clients_by_id:
+        ci_id = self.get_query_argument('ciid', None)
+        if ci_id and ci_id in ConnectionInfoHandler.clients_by_id:
             client = ConnectionInfoHandler.clients_by_id[ci_id] 
             # should be neutralized or use a custom IPython extension?
             # but fine for the context of the LTI bootcamp notebook
             code = "id_token='{0}';state='{1}'".format(id_token, state)
             client.execute(code)
-            dir_path = os.path.dirname(os.path.realpath(__file__))
-            loader = template.Loader(dir_path)
-            self.finish(loader.load("authresponse.html").generate(state=state, id_token=id_token))
-        else:
-            self.set_status(400)
-            self.finish('Missing parameters or not configured client')
+        dir_path = os.path.dirname(os.path.realpath(__file__))
+        loader = template.Loader(dir_path)
+        self.finish(loader.load("authresponse.html").generate(state=state, id_token=id_token))
 
     def check_xsrf_cookie(self):
         pass
-
-    def get(self):
-        dir_path = os.path.dirname(os.path.realpath(__file__))
-        loader = template.Loader(dir_path)
-        self.finish(loader.load("authresponse.html").generate(state="XXX", id_token='3289y9d9u293e982748h2d928.3278923u'))
 
 def load_jupyter_server_extension(nb_server_app):
     """
@@ -77,6 +69,8 @@ def load_jupyter_server_extension(nb_server_app):
     host_pattern = '.*$'
     route_pattern = url_path_join(web_app.settings['base_url'], '/setandshow')
     web_app.add_handlers(host_pattern, [(route_pattern, SetAndShowHandler)])
+    route_pattern = url_path_join(web_app.settings['base_url'], '/auth')
+    web_app.add_handlers(host_pattern, [(route_pattern, SetAndShowHandler)])
     route_pattern_r = url_path_join(web_app.settings['base_url'], '/setci')
     web_app.add_handlers(host_pattern, [(route_pattern_r, ConnectionInfoHandler)])
-    print("store_and_show handler added, set ci rout is {0}".format(route_pattern_r))
+    print("store_and_show handler added, set ci route is {0}".format(route_pattern_r))

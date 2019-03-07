@@ -9,9 +9,14 @@
         </script>
     </head>
     <body>
-        <h3>Successful authentication response</h3>
-        <p><code>state</code> and <code>id_token</code> variables should now be available in your notebook.
-            If not you can copy them from here and set them manually.
+        <h3>Authentication response</h3>
+        <p>
+            Here is Authentication response from the Learning Platform.
+            You will need to verify the <code>state</code> is the same
+            as the one that was sent, that the<code>id_token</code> 
+            can be verified with one of the platformś public keys,
+            and finally that the <code>nonce</code> in the id_token
+            is also the one you sent.
         </p>
         <h4>state <button onclick="clipboard('state')">copy</button></h4>
         <textarea id='state'>{{ state }}</textarea>

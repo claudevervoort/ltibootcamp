@@ -113,11 +113,12 @@ def student_launch(tool_id, context_id, nonce=None,  resource_link_id=None):
     rlid = resource_link_id or request.args.get('rlid', '' )
     rlid = rlid if rlid else course.getOneGradableLinkId()
     resource_link = course.getResourceLink(rlid)
+    return_url = "/tool/{0}/resourcelinkreturn/{1}".format(course.id, rlid)
     return platform.get_tool(tool_id).message('LTIResourceLinkLaunch', 
                                             course, 
                                             course.roster.getOneStudent(), 
                                             {}, 
-                                            request.url_root,
+                                            return_url,
                                             nonce=nonce,
                                             request_url=request.url_root,
                                             resource_link=resource_link)

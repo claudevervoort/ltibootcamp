@@ -31,8 +31,8 @@ class Tool(object):
             message['nonce'] = nonce
         message.update({
             'iat': now,
-            'exp': now + 60,
-            'nonce': str(uuid.uuid1()),
+            'exp': now + 60*10,
+            'nonce': nonce,
             'iss': root_url,
             'aud': self.client_id,
             fc('deployment_id'): self.deployment_id,
