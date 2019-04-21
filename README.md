@@ -9,11 +9,21 @@ LTI Bootcamp has 2 components:
 - Server: an LTI platform simulator, implementing most of LTI 1.3 Advantage
 - Jupyter Notebook: A Jupyter notebook to simulate a Tool interacting with a platform
 
+You can have an idea of the notebook directly in github: [notebook](https://github.com/claudevervoort/ltibootcamp/blob/master/jupyter/notebooks/LTIBootCamp.ipynb).
+
 <img src="jupyter/notebooks/assets/bootcamp_arch.png">
+
+# Companion Youtube videos
+
+Alongside the development of the notebook, there are a set of hand-drawn videos explaining LTI 1.3: [LTI 1.3 Advantage on Youtube](https://www.youtube.com/playlist?list=PLb5mG7w3UZkPKHODmz5YCkIqnWQEsjMkd).
 
 # Limitation of the bootcamp
 
-The bootcamp uses Jupyter to mix live code and text. Since the platform cannot launch into Jupyter, the bootcamp LTI server has API to get launch data (the data a tool would normatlly receive in the launch POST request).
+The bootcamp uses Jupyter to mix live code and text. Since the platform cannot launch into Jupyter, the bootcamp LTI server has API to get launch data (the data a tool would normally receive in the launch POST request).
+
+# Hosted version
+
+Not available for now, it was available for a little while using free tier Kubernetes but this has ran out of gas. Depending on interest, I can see to host it elsewhere, possibly a single node somewhere with something like (systemsspawner)[https://github.com/jupyterhub/systemdspawner]. Let me know if you want to host it too :)
 
 # How to use
 
