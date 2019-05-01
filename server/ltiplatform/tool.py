@@ -4,7 +4,7 @@ from keys.keys_manager import get_client_key, keys, get_keyset, get_public_key
 import jwt
 import uuid
 from random import randrange
-from ltiplatform.ltiutil import fc, scope
+from ltiplatform.ltiutil import fc, scope, hmac_sha256_signature
 
 class Tool(object):
 
@@ -75,7 +75,16 @@ class Tool(object):
             message[fc('custom')] = dict(map(resolve, custom.items()))
 
         message[fc('endpoint', s='ags')] = ags_claim    
-        message[fc('namesroleservice', s='nrps')] = memberships_claim 
+        message[fc('namesroleservice', s='nrps')] = memberships_claim
+
+        lti11_key='e2573-371879'
+        lti11_key_sign=hmac_sha256_signature('lti11-secret', '&'.join((lti11_key, self.deployment_id, root_url, self.client_id, str(message['exp']), nonce)))
+        
+        message[fc('lti1p1')] = {
+            'oauth_consumer_key': lti11_key,
+            'oauth_consumer_key_sign': lti11_key_sign
+        }
+
         message = self.platform.addToMessage(message)
         return jwt.encode(message, privatekey, algorithm='RS256', headers={'kid':key[0]})
 

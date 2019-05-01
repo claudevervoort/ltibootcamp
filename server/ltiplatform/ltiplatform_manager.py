@@ -6,7 +6,7 @@ import uuid
 from course.course_manager import Course 
 from random import randrange
 from ltiplatform.tool import Tool
-from ltiplatform.ltiutil import fc, scope
+from ltiplatform.ltiutil import fc, scope, hmac_sha256_signature
 
 class LTIPlatform(object):
 
