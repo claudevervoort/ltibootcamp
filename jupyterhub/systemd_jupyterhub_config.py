@@ -80,7 +80,6 @@ import os
 from jupyterhub.auth import PAMAuthenticator
 from traitlets import default
 from tornado import gen
-from tornado.concurrent import run_on_executor
 
 class FixedPasswordAuthenticator(PAMAuthenticator):
 
@@ -88,7 +87,6 @@ class FixedPasswordAuthenticator(PAMAuthenticator):
     #@default('custom_html')
     #def _get_custom_html(self):
     #    return '222'
-
     #@gen.coroutine
     #@run_on_executor
     async def authenticate(self, handler, data):
@@ -332,7 +330,10 @@ c.JupyterHub.authenticator_class = FixedPasswordAuthenticator
 ## The class to use for spawning single-user servers.
 #  
 #  Should be a subclass of Spawner.
-#c.JupyterHub.spawner_class = 'jupyterhub.spawner.LocalProcessSpawner'
+c.JupyterHub.spawner_class = 'systemdspawner.SystemdSpawner'
+c.SystemdSpawner.mem_limit = '250M'
+c.SystemdSpawner.cpu_limit = 0.25
+c.SystemdSpawner.user_workingdir = '/home/{USERNAME}/ltibootcamp'
 
 ## Path to SSL certificate file for the public facing interface of the proxy
 #  
@@ -420,7 +421,8 @@ c.JupyterHub.authenticator_class = FixedPasswordAuthenticator
 #  Some spawners allow shell-style expansion here, allowing you to use
 #  environment variables here. Most, including the default, do not. Consult the
 #  documentation for your spawner to verify!
-c.Spawner.args = ["--NotebookApp.nbserver_extensions={'storeandshow.requesthandler':True}"]
+c.Spawner.args = ["--NotebookApp.nbserver_extensions={{'storeandshow.requesthandler':True}}"]
+c.SystemdSpawner.extra_paths = ['/home/claude/projects//lti_bootcamp/jupyterext']
 
 ## The command used for starting the single-user server.
 #  
@@ -570,7 +572,7 @@ c.Spawner.args = ["--NotebookApp.nbserver_extensions={'storeandshow.requesthandl
 #  print
 #  Note that this does *not* prevent users from accessing files outside of this
 #  path! They can do so with many other means.
-c.Spawner.notebook_dir = os.path.join(os.getcwd(), 'jhnotebooks/{username}')
+# c.Spawner.notebook_dir = os.path.join(os.getcwd(), 'jhnotebooks/{username}')
 
 ## An HTML form for options a user can specify on launching their server.
 #  
@@ -631,10 +633,9 @@ def copy_notebook(spawner):
     print('pre-spawning %s', (spawner.user.name))
     username = spawner.user.name # get the username
     
-    notebooks_path = os.path.join(os.getcwd(),'jhnotebooks')
-    volume_path = os.path.join(notebooks_path, username)
-    if not os.path.exists(notebooks_path):
-        os.mkdir(notebooks_path) #set proper version
+    volume_path = os.path.join('/home/', username, 'ltibootcamp')
+    #if not os.path.exists(notebooks_path):
+    #    os.mkdir(notebooks_path) #set proper version
     if not os.path.exists(volume_path):
         # create a directory with umask 0755 
         # hub and container user must have the same UID to be writeable

@@ -21,6 +21,10 @@ def send_js(path):
 def hello():
     return "LTI Bootcamp Tool Consumer, hello!"
 
+@app.route("/ping")
+def ping():
+    return "pong!"
+
 @app.route("/.well-known/jwks.json")
 def keyset():
     return jsonify(platform.get_keyset())
