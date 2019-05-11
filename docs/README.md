@@ -17,7 +17,7 @@ You can have an idea of the notebook directly in github: [notebook](https://gith
 
 Alongside the development of the notebook, there are a set of hand-drawn videos explaining LTI 1.3 and Advantage (WIP):
 
-<iframe width="560" height="315" src="https://www.youtube.com/videoseries?list=PLb5mG7w3UZkPKHODmz5YCkIqnWQEsjMkd" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+<iframe width="560" height="315" src="https://www.youtube.com/embed/f_6pWiQpg5s" frameborder="0" allow="accelerometer; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
 
 
 # Limitation of the bootcamp
