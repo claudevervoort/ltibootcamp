@@ -1,4 +1,4 @@
-<img src="jupyter/notebooks/assets/bootcamp.png">
+<img src="bootcamp_transparent_midnight.png">
 
 # LTI Bootcamp
 
@@ -11,11 +11,14 @@ LTI Bootcamp has 2 components:
 
 You can have an idea of the notebook directly in github: [notebook](https://github.com/claudevervoort/ltibootcamp/blob/master/jupyter/notebooks/LTIBootCamp.ipynb).
 
-<img src="jupyter/notebooks/assets/bootcamp_arch.png">
+<img src="bootcamp_arch.png">
 
 # Companion Youtube videos
 
-Alongside the development of the notebook, there are a set of hand-drawn videos explaining LTI 1.3: [LTI 1.3 Advantage on Youtube](https://www.youtube.com/playlist?list=PLb5mG7w3UZkPKHODmz5YCkIqnWQEsjMkd).
+Alongside the development of the notebook, there are a set of hand-drawn videos explaining LTI 1.3 and Advantage (WIP):
+
+<iframe width="560" height="315" src="https://www.youtube.com/embed/f_6pWiQpg5s" frameborder="0" allow="accelerometer; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+
 
 # Limitation of the bootcamp
 
@@ -23,7 +26,11 @@ The bootcamp uses Jupyter to mix live code and text. Since the platform cannot l
 
 # Hosted version
 
-Not available for now, it was available for a little while using free tier Kubernetes but this has ran out of gas. Depending on interest, I can see to host it elsewhere, possibly a single node somewhere with something like (systemsspawner)[https://github.com/jupyterhub/systemdspawner]. Let me know if you want to host it too :)
+There is a hosted version running on a tiny OVH server, it might be up and ready for you to try!
+
+1. go to https://notebook.theedtech.dev
+2. login: any username, and the magic word is ltib00t!
+
 
 # How to use
 
