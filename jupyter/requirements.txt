@@ -26,6 +26,7 @@ jupyter-client==5.2.4
 jupyter-console==5.2.0
 jupyter-core==4.4.0
 jupyterhub==1.0.0
+jupyterhub-systemdspawner==0.13
 Mako==1.0.9
 MarkupSafe==1.1.1
 mistune==0.8.4

@@ -35,6 +35,11 @@ class ConnectionInfoHandler(IPythonHandler):
     def check_xsrf_cookie(self):
         pass
 
+class PingHandler(IPythonHandler):
+
+    def get(self):
+        self.finish('pong!')
+
 class SetAndShowHandler(IPythonHandler):
 
     def post(self):
@@ -73,4 +78,7 @@ def load_jupyter_server_extension(nb_server_app):
     web_app.add_handlers(host_pattern, [(route_pattern, SetAndShowHandler)])
     route_pattern_r = url_path_join(web_app.settings['base_url'], '/setci')
     web_app.add_handlers(host_pattern, [(route_pattern_r, ConnectionInfoHandler)])
+    route_pattern_r = url_path_join(web_app.settings['base_url'], '/ping')
+    web_app.add_handlers(host_pattern, [(route_pattern_r, PingHandler)])
+
     print("store_and_show handler added, set ci route is {0}".format(route_pattern_r))
