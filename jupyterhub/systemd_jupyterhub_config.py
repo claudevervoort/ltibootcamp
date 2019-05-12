@@ -644,6 +644,7 @@ def copy_notebook(spawner):
         # os.mkdir(volume_path, 0o755)
         shutil.copytree(os.path.join(os.getcwd(), '../jupyter/notebooks/'), volume_path)
         print('copy dir %s' % (volume_path))
+        shutil.chown(volume_path, user=username, group=username)
         with os.scandir(volume_path) as it:
             for entry in it:
                 if entry.is_dir():
