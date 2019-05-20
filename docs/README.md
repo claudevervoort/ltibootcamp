@@ -45,7 +45,7 @@ Once you have the notebook and the server up, open the ltibootcamp notebook, and
 
 There is a hosted version running on a tiny OVH server, it might be up and ready for you to try!
 
-1. go to https://notebook.theedtech.dev
+1. go to [https://notebook.theedtech.dev](https://notebook.theedtech.dev)
 2. login: any username, and the magic word is ltib00t!
 3. the learning platform url to use is: https://ltiplatform.theedtech.dev
 
