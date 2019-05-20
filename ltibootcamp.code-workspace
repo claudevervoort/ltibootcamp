@@ -17,6 +17,9 @@
 		},
 		{
 			"path": "/home/claude/py3envs/jupyter"
+		},
+		{
+			"path": "/home/claude/py3envs/jupyter/lib64/python3.6/site-packages"
 		}
 	],
 	"settings": {

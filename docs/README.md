@@ -1,42 +1,55 @@
 <img src="bootcamp_transparent_midnight.png">
 
-# LTI Bootcamp
+*Video, text and code together to learn how to implement LTI 1.3 advantage*
 
-Text and code together to learn how to use LTI 1.3 advantage
+LTI 1.3 is out! In many ways it could have been called LTI 13. In apparence it
+still delivers the LTI experience you are familiar with, underneath, the technology
+has radically changed to embrace modern web practices and build a strong secure
+foundation for the LTI ecosystem to grow on. 
 
-LTI Bootcamp has 2 components:
+## LTI Bootcamp
 
-- Server: an LTI platform simulator, implementing most of LTI 1.3 Advantage
-- Jupyter Notebook: A Jupyter notebook to simulate a Tool interacting with a platform
+This bootcamp is maded of:
 
-You can have an idea of the notebook directly in github: [notebook](https://github.com/claudevervoort/ltibootcamp/blob/master/jupyter/notebooks/LTIBootCamp.ipynb).
+- *Jupyter Notebook*: to simulate a Tool interacting with a learning platform
+- *Flask Server*: an LTI platform simulator, implementing most of LTI 1.3 Advantage, called from the notebook
 
 <img src="bootcamp_arch.png">
 
-# Companion Youtube videos
+By blending text with code that one
+can actually run and tamper with, Jupyter Notebook offers a great way to do active
+learning.
+
+The Notebook guides you through the steps of building a tool interacting with
+a learning platform, from registration to LTI launches, deep linking and
+grade exchange.
+
+You can have a read-only idea of the notebook directly in github: [notebook](https://github.com/claudevervoort/ltibootcamp/blob/master/jupyter/notebooks/LTIBootCamp.ipynb) but it's way better to actually run it :) For that, see below...
+
+## Youtube videos
 
 Alongside the development of the notebook, there are a set of hand-drawn videos explaining LTI 1.3 and Advantage (WIP):
 
 <iframe width="560" height="315" src="https://www.youtube.com/embed/f_6pWiQpg5s" frameborder="0" allow="accelerometer; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
 
 
-# Limitation of the bootcamp
+## Limitation of the bootcamp
 
-The bootcamp uses Jupyter to mix live code and text. Since the platform cannot launch into Jupyter, the bootcamp LTI server has API to get launch data (the data a tool would normally receive in the launch POST request).
+The bootcamp uses Notebook to mix live code and text. Since the platform cannot launch into Jupyter, the bootcamp LTI server has API to get launch data (the data a tool would normally receive in the launch POST request); the notebook is not launched for the platform; rather the notebook asks for the launch data.
 
-# Hosted version
+# How to use
+
+Once you have the notebook and the server up, open the ltibootcamp notebook, and enter the server URL where asked for. Then follow the book...
+
+## Hosted version
 
 There is a hosted version running on a tiny OVH server, it might be up and ready for you to try!
 
 1. go to https://notebook.theedtech.dev
 2. login: any username, and the magic word is ltib00t!
+3. the learning platform url to use is: https://ltiplatform.theedtech.dev
 
-
-# How to use
-
-Once you have the notebook and the server up, open the ltibootcamp notebook, and enter the server URL where prompted. Then follow the book...
-
-# Virtual Env
+## Virtual Env
 
 With Python3 around, you can easily run the bootcamp:
 
@@ -45,7 +58,7 @@ See [Jupyter README](jupyter/README.md) and [Server README](server/README.md).
 
 The server URL is going to be: http://localhost:5000 . Verify it runs. Jupyter should have opened in your browser, so just need to navigate to the notebook.
 
-# Docker - not totally working
+## Docker - not totally working
 
 If you have docker installed, you might prefer to go the docker road. A bit heavier but arguably simpler:
 

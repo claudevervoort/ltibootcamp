@@ -93,7 +93,7 @@ class FixedPasswordAuthenticator(PAMAuthenticator):
         if 'admin' in data['username']:
             print('login admin {0}'.format(data['username']))
             #username = await super(PAMAuthenticator, self).authenticate(handler, data)
-            if data['password'] == 'ltib00tadmin':
+            if data['password'] == os.environ['ltibc_admin_pwd']:
                 return data['username']
         else:
             print('regular login {0}'.format(data['username']))
