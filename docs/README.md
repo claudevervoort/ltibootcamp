@@ -2,9 +2,9 @@
 
 **Video, text and code together to learn how to implement LTI 1.3 advantage**
 
-*This is a personal project to help developers bootup on LTI 1.3.
+*This is a personal project to help developers bootup on LTI 1.3 Advantage.
 Make sure to check-out IMS Global official page with the actual
-apecifications and additional resources on [imsglobal.org](https://www.imsglobal.org/activity/learning-tools-interoperability).
+specifications and additional resources on [imsglobal.org](https://www.imsglobal.org/activity/learning-tools-interoperability).
 LTI is a trademark of IMS Global.*
 
 LTI 1.3 is out! In many ways it could have been called LTI 13. In apparence it
