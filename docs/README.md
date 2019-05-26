@@ -46,6 +46,15 @@ The bootcamp uses Notebook to mix live code and text. Since the platform cannot 
 
 Once you have the notebook and the server up, open the ltibootcamp notebook, and enter the server URL where asked for. Then follow the book...
 
+## Docker
+
+`docker run -p 5000:5000 -p 8888:8888 -t claudevervoort/ltibootcamp:latest`
+
+Or build the latest locally:
+
+`docker build . -t ltibootcamp`
+`docker run -p 5000:5000 -p 8888:8888 -t ltibootcamp` 
+
 ## Hosted version
 
 There is a hosted version running on a tiny OVH server, it might be up and ready for you to try!
@@ -62,11 +71,3 @@ You can run the jupyter notebook and the lti server in 2 virtual envs.
 See [Jupyter README](jupyter/README.md) and [Server README](server/README.md).
 
 The server URL is going to be: http://localhost:5000 . Verify it runs. Jupyter should have opened in your browser, so just need to navigate to the notebook.
-
-## Docker - not totally working
-
-If you have docker installed, you might prefer to go the docker road. A bit heavier but arguably simpler:
-
-Cd in this folder, and run docker-compose up. 1st run? Wait a bit... and more... until the internet is downloaded. Then you should be good to go.
-
-You need to use the http://platform:5000 for the platform URL. Later in the notebook, the notebook makes a browser request to that URL (displaying the response of the content item), and that won work. Either change that url to localhost, add platform 127.0.0.1 to your host or play with extra_hosts (https://biancatamayo.me/blog/2017/11/03/docker-add-host-ip/).

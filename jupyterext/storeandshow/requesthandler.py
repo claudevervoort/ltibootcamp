@@ -40,6 +40,18 @@ class PingHandler(IPythonHandler):
     def get(self):
         self.finish('pong!')
 
+class EchoAuthHandler(IPythonHandler):
+
+    def post(self):
+        id_token = self.get_body_argument('id_token')
+        state = self.get_body_argument('state')
+        dir_path = os.path.dirname(os.path.realpath(__file__))
+        loader = template.Loader(dir_path)
+        self.finish(loader.load("authresponse.html").generate(state=state, id_token=id_token))
+
+    def check_xsrf_cookie(self):
+        pass
+
 class SetAndShowHandler(IPythonHandler):
 
     def post(self):
@@ -75,7 +87,7 @@ def load_jupyter_server_extension(nb_server_app):
     route_pattern = url_path_join(web_app.settings['base_url'], '/setandshow')
     web_app.add_handlers(host_pattern, [(route_pattern, SetAndShowHandler)])
     route_pattern = url_path_join(web_app.settings['base_url'], '/auth')
-    web_app.add_handlers(host_pattern, [(route_pattern, SetAndShowHandler)])
+    web_app.add_handlers(host_pattern, [(route_pattern, EchoAuthHandler)])
     route_pattern_r = url_path_join(web_app.settings['base_url'], '/setci')
     web_app.add_handlers(host_pattern, [(route_pattern_r, ConnectionInfoHandler)])
     route_pattern_r = url_path_join(web_app.settings['base_url'], '/ping')
