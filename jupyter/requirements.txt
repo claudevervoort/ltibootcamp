@@ -32,7 +32,7 @@ MarkupSafe==1.1.1
 mistune==0.8.4
 nbconvert==5.5.0
 nbformat==4.4.0
-notebook==6.1.5
+notebook==6.4.1
 oauthlib==3.0.1
 pamela==1.0.0
 pandocfilters==1.4.2
