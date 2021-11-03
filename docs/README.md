@@ -14,7 +14,7 @@ foundation for the LTI ecosystem to grow on.
 
 ## LTI Bootcamp
 
-This bootcamp is maded of:
+This bootcamp is made of:
 
 - *Jupyter Notebook*: to simulate a Tool interacting with a learning platform
 - *Flask Server*: an LTI platform simulator, implementing most of LTI 1.3 Advantage, called from the notebook
