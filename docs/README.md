@@ -14,7 +14,7 @@ foundation for the LTI ecosystem to grow on.
 
 ## LTI Bootcamp
 
-This bootcamp is maded of:
+This bootcamp is made of:
 
 - *Jupyter Notebook*: to simulate a Tool interacting with a learning platform
 - *Flask Server*: an LTI platform simulator, implementing most of LTI 1.3 Advantage, called from the notebook
@@ -54,6 +54,9 @@ Or build the latest locally:
 
 `docker build . -t ltibootcamp`
 `docker run -p 5000:5000 -p 8888:8888 -t ltibootcamp` 
+
+Or use Docker Compose:
+`docker-compose up -d`
 
 ## Hosted version
 
