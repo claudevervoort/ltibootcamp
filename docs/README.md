@@ -55,6 +55,9 @@ Or build the latest locally:
 `docker build . -t ltibootcamp`
 `docker run -p 5000:5000 -p 8888:8888 -t ltibootcamp` 
 
+Or use Docker Compose:
+`docker-compose up -d`
+
 ## Hosted version
 
 There is a hosted version running on a tiny OVH server, it might be up and ready for you to try!
