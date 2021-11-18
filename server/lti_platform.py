@@ -78,7 +78,7 @@ def oidc_authorization():
                                   resource_link_id=resource_link_id)
     else:
         abort(400)
-    return render_template('postauthresponse.html', redirect_uri=redirect_uri, state=state, id_token=id_token.decode('utf-8'))
+    return render_template('postauthresponse.html', redirect_uri=redirect_uri, state=state, id_token=id_token)
 
 
 @app.route("/tool/<tool_id>/deeplinkingmessage")

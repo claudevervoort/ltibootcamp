@@ -19,3 +19,6 @@ export PYTHONPATH=$PYTHONPATH:/home/claude/projects/lti_bootcamp/jupyterext
 then run the notebook activating this extension:
 jupyter notebook --NotebookApp.nbserver_extensions="{'storeandshow.requesthandler':True}"
                                                                                                                  
+or:
+
+PYTHONPATH=$PYTHONPATH:/home/claude/projects/lti_bootcamp/jupyterext jupyter notebook --NotebookApp.nbserver_extensions="{'storeandshow.requesthandler':True}"
