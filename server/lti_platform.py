@@ -1,10 +1,9 @@
 from flask import Flask, jsonify, request, render_template, redirect, send_from_directory, abort
 from ltiplatform.ltiplatform_manager import LTIPlatform
-from ltiplatform.ltiutil import fc, fdlc
-from keys import keys_manager
-from random import randrange
+from ltiplatform.ltiutil import fdlc
 from accesstoken.token_manager import check_token, new_token
 import jwt
+
 
 platform = LTIPlatform('http://localhost:5000')
 app = Flask(__name__)
@@ -99,9 +98,9 @@ def content_item_launch(tool_id, nonce=None, redirect_uri=None):
 @app.route("/tool/<context_id>/dlr", methods=['POST'])
 def content_item_return(context_id):
     encoded_jwt = request.form['jws_token']
-    unverified = jwt.decode(encoded_jwt, verify=False)
+    unverified = jwt.decode(encoded_jwt, options={'verify_signature': False})
     tool = platform.get_tool(unverified['iss'])
-    deep_linking_res = jwt.decode(encoded_jwt, 
+    deep_linking_res = jwt.decode(encoded_jwt,
        key=tool.getPublicKey().exportKey(), 
        algorithms=['RS256'],
        audience=request.url_root.rstrip('/'))
