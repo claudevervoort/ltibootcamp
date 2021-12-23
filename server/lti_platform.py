@@ -154,7 +154,7 @@ def get_access_token():
     if not request.form.get('scope'):
         abort(400)
     assertion_jwt = request.form['client_assertion']
-    client_id = jwt.decode(assertion_jwt, verify=False)['iss']
+    client_id = jwt.decode(assertion_jwt, options={'verify_signature': False})['iss']
     tool = platform.get_tool(client_id)
     jwt.decode(assertion_jwt,
                tool.getPublicKey().exportKey(),
