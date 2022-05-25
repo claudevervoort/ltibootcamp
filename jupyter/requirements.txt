@@ -46,7 +46,7 @@ ptyprocess==0.7.0
 py==1.10.0
 pycparser==2.20
 Pygments==2.10.0
-PyJWT==2.3.0
+PyJWT==2.4.0
 pyOpenSSL==21.0.0
 pyrsistent==0.18.0
 pytest==6.2.5
